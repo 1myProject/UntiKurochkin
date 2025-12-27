@@ -1,0 +1,15 @@
+[package]
+name = "FreqConverter"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+enigo = "0.6.1"
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Diagnostics_Debug", "Win32_System_Threading", "Win32_UI", "Win32_UI_WindowsAndMessaging"] }
+screen_size = "0.1.0"
+crc64fast-nvme = "1.2.1"
+sysinfo = "0.37.2"
+reqwest = { version = "0.12.24", features = ["blocking"]}
+serde = {version="1.0.99", features=["derive"]}
+serde_json = {version="1.0.99"}
+rand = "0.10.0-rc.5"
