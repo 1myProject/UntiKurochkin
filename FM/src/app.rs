@@ -638,6 +638,8 @@ impl App {
     pub fn write_tabl2_4_call(&mut self, col: i32, row: i32, val: f32) {
         let text = format!("{val:.1}");
 
+        self.sleep(2000);
+
         self.click_table(138 + col * 80, 123 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
         self.enigo.text(to_human_value(text).as_str()).unwrap();

@@ -182,7 +182,7 @@ fn main() {
 
     println!("Приступаю к выполнению");
 
-    app.form();
+    // app.form();
     app.setup_maket();
     step1(&mut app);
 
