@@ -19,6 +19,7 @@ pub struct App {
     cur_kia: KIA,
 }
 
+const SAFE_WAITER: u64=50;
 impl App {
     pub fn new(mem: Meme) -> App {
         let enigo = Enigo::new(&Settings::default()).unwrap();
@@ -37,7 +38,7 @@ impl App {
         self.enigo.button(Button::Left, Press).unwrap();
         self.enigo.button(Button::Left, Release).unwrap();
         #[cfg(not(debug_assertions))]
-        self.sleep(20);
+        self.sleep(SAFE_WAITER);
     }
 
     fn click_table(&mut self, x: i32, y: i32) {
@@ -48,7 +49,7 @@ impl App {
         self.enigo.button(Button::Left, Press).unwrap();
         self.enigo.button(Button::Left, Release).unwrap();
         #[cfg(not(debug_assertions))]
-        self.sleep(20);
+        self.sleep(SAFE_WAITER);
     }
 
     fn move_to(&mut self, x: i32, y: i32) {
@@ -57,15 +58,14 @@ impl App {
             .move_mouse(xo + x, yo + y, Coordinate::Abs)
             .unwrap();
         #[cfg(not(debug_assertions))]
-        self.sleep(20);
+        self.sleep(SAFE_WAITER);
     }
 
     // down -> 1 | up -> -1
     fn scroll(&mut self, x: i32, y: i32, to: i32) {
         self.move_to(x, y);
         self.enigo.scroll(to, enigo::Axis::Vertical).unwrap();
-        #[cfg(not(debug_assertions))]
-        self.sleep(20);
+        self.sleep(SAFE_WAITER);
     }
 
     pub fn sleep(&self, mils: u64) {
@@ -133,7 +133,7 @@ impl App {
     fn vg_more_more(&mut self) {
         let v = self.mem.vg();
         for i in [1., 0.1, 0.01, 0.001, 0.0001] {
-            if 0.99 * i <= v && v < 1. * i {
+            if 0.96 * i <= v && v < 1. * i {
                 return self.vg_more();
             }
         }
@@ -158,6 +158,8 @@ impl App {
 
     fn set_vg(&mut self, indx: i32) {
         let v = self.mem.vg();
+        #[cfg(debug_assertions)]
+        println!("{}", 545 + indx * 24);
         self.click(265, 545 + indx * 24);
         self.waiter_1sec_while(|| v != self.mem.vg());
     }
@@ -203,12 +205,6 @@ impl App {
             let diff = (vm_r - v_find).abs();
 
             let vm = self.mem.vm();
-            if vm >= 3.47 {
-                let indx = 4 + last_vg.log10() as i32;
-                self.set_vg(indx);
-                vm_r = self.mem.vm();
-                continue;
-            }
             if vm_r < v_find {
                 if diff > 0.002 {
                     self.vg_more_more()
@@ -240,7 +236,7 @@ impl App {
             let vg = self.mem.vg();
             if vg.log10().round() == vg.log10() {
                 let indx = 5 + vg.log10() as i32;
-                if vg - last_vg > 0. {
+                if vg - last_vg >= 0. {
                     self.set_vg(indx);
                 } else {
                     self.set_vg(indx - 1);
@@ -605,7 +601,7 @@ impl App {
         }
     }
 
-    pub fn find_volt_by_r8_revers(&mut self, find_volt: f32, reverse: bool) {
+    pub fn find_05volt_by_r8_revers(&mut self, reverse: bool) {
         let down: fn(&mut Self);
         let up: fn(&mut Self);
 
@@ -618,19 +614,24 @@ impl App {
         }
 
         let mut volt = self.mem.vm();
-        let mut dif = 100.;
+        while volt > 1. {
+            down(self);
+            volt = self.mem.vm();
+        }
+
+        let mut dif = 100.0f32;
         let mut last = None;
-        while (volt - find_volt).abs() > dif {
-            dif = (volt - find_volt).abs();
+        while (volt - 0.5).abs() < dif {
+            dif = (volt - 0.5).abs();
             let r = self.mem.r8();
-            if volt < find_volt {
-                down(self);
+            if volt < 0.5 {
+                up(self);
                 // self.scroll_r8_down()
             } else {
-                up(self);
+                down(self);
                 // self.scroll_r8_up();
             }
-            last = Some(volt < find_volt);
+            last = Some(volt < 0.5);
             self.waiter_1sec_while(|| r != self.mem.r8());
 
             self.sleep(10);
@@ -638,8 +639,8 @@ impl App {
         }
 
         match last {
-            Some(true) => self.scroll_r8_up(),
-            Some(false) => self.scroll_r8_down(),
+            Some(true) => down(self),
+            Some(false) => up(self),
             None => (),
         }
     }
@@ -667,11 +668,11 @@ impl App {
             self.waiter_1sec_while(|| u != self.mem.uk());
 
             let u = self.mem.uk();
-            if u > uk {
+            if u < uk {
                 self.scroll_r8_up();
                 break;
             }
-            uk = self.mem.uk();
+            uk = u;
         }
 
         let mut difs = [0.0; 3];
@@ -763,7 +764,51 @@ impl App {
 
         self.close_tabl();
     }
+    pub fn write_table4_2(&mut self, col: i32, row: i32, val: f32) {
+        self.open_table(4);
 
+        self.write_tabl4_2_call(col, row, val);
+
+        self.close_tabl();
+    }
+
+    pub fn write_table4_3_5(&mut self, table: u32,  col: i32, row: i32, val: f32) {
+        let indx = match table {
+            3=>7,
+            4=>8,
+            5=>0,
+            _=>7,
+        };
+        self.open_table(indx);
+
+        self.write_tabl4_2_call(col, row, val);
+
+        self.close_tabl();
+    }
+
+    pub fn write_table4_6(&mut self, col: i32, row: i32, val: f32) {
+        self.open_table(1);
+
+        self.write_tabl4_1_call(col, row, val);
+
+        self.close_tabl();
+    }
+    pub fn write_table4_7(&mut self, col: i32, row: i32, val: f32) {
+        self.open_table(2);
+
+        self.write_tabl4_1_call(col, row, val);
+
+        self.close_tabl();
+    }
+
+    pub fn write_table5(&mut self, col: i32, row: i32, val: f32) {
+        self.open_table(5);
+
+        self.write_tabl5_call(col, row, val);
+
+        self.close_tabl();
+
+    }
     fn write_tabl1_call(&mut self, col: i32, row: i32, val: f32) {
         let text = format!("{val:.1}");
 
@@ -809,28 +854,10 @@ impl App {
         self.sleep(WRITE_TABL_CLICK_T);
     }
 
-    fn write_tabl4_3_call(&mut self, col: i32, row: i32, val: f32) {
+    fn write_tabl4_3_5_call(&mut self, col: i32, row: i32, val: f32) {
         let text = format!("{val:.1}");
 
         self.click_table(130 + col * 82, 121 + row * 32);
-        self.sleep(WRITE_TABL_CLICK_T);
-        self.enigo.text(to_human_value(text).as_str()).unwrap();
-        self.sleep(WRITE_TABL_CLICK_T);
-    }
-
-    fn write_tabl4_4_call(&mut self, col: i32, row: i32, val: f32) {
-        let text = format!("{val:.1}");
-
-        self.click_table(125 + col * 82, 121 + row * 32);
-        self.sleep(WRITE_TABL_CLICK_T);
-        self.enigo.text(to_human_value(text).as_str()).unwrap();
-        self.sleep(WRITE_TABL_CLICK_T);
-    }
-
-    fn write_tabl4_5_call(&mut self, col: i32, row: i32, val: f32) {
-        let text = format!("{val:.1}");
-
-        self.click_table(125 + col * 82, 121 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
         self.enigo.text(to_human_value(text).as_str()).unwrap();
         self.sleep(WRITE_TABL_CLICK_T);

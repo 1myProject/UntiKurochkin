@@ -101,7 +101,8 @@ impl Meme {
             println!("Подозрительная частота Генератора");
             f = true;
         }
-        if !(10.0..=20_000.).contains(&self.fm()) {
+        let fm = self.fm();
+        if fm!=0. && !(10.0..=20_000.).contains(&fm) {
             println!("Подозрительная модулирующая частота Генератора");
             f = true;
         }
@@ -114,7 +115,7 @@ impl Meme {
             f = true;
         }
         let r8 = self.r8();
-        if r8.ceil() != r8 || (0.0..=6800.).contains(&self.r8()) {
+        if r8.ceil() != r8 || !(0.0..=6800.).contains(&r8) {
             println!("Подозрительный R8");
             f = true;
         }
@@ -182,7 +183,7 @@ impl Meme {
         const Ib_VT1: usize = 0x0063223C;
         const Ube_VT1: usize = 0x006322D0;
 
-        let ek:f32 = self.read(Ek);
+        let ek:f32 = self.read::<i32>(Ek) as f32;
         let ib:f32 = self.read(Ib_VT1);
         let ube:f32 = self.read(Ube_VT1);
 
