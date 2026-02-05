@@ -30,6 +30,9 @@ fn step1(app: &mut App) {
         app.write_table1(c);
     }
 
+    app.open_table(0);
+    app.final_table();
+    app.close_tabl();
     println!("step1 time: {:?}", st.elapsed());
 }
 fn step2(app: &mut App) {
@@ -67,7 +70,6 @@ fn step2(app: &mut App) {
     app.set_sas([1,2,2,0,2,1,0,1]);
     app.find_max_uk_by_r8();
     app.set_vg_to(0.001);
-    app.set_fv1(1);
     find_max_volt_from_fv1(app);
     app.find_volt_by_vg1(0.5);
     find_max_volt_from_fv1(app);
@@ -81,6 +83,9 @@ fn step2(app: &mut App) {
 
     doing(app, 0);
 
+    app.open_table(1);
+    app.final_table();
+    app.close_tabl();
     println!("step2 time: {:?}", st.elapsed());
 }
 fn step3(app: &mut App) {
@@ -116,6 +121,11 @@ fn step3(app: &mut App) {
     app.write_table3(4, kg);
     app.sa8();
     app.set_kia_to(KIA::DIGIT);
+
+    app.open_table(2);
+    app.final_table();
+    app.close_tabl();
+
     println!("step3 time: {:?}", st.elapsed());
 }
 fn step4_1(app: &mut App) -> f32 {
@@ -135,7 +145,7 @@ fn step4_1(app: &mut App) -> f32 {
 
     let f0 = app.mem.fv()/1000.;
     app.write_table4_1(3, 3, f0);
-    app.write_table4_1(3, 4, i_start);
+    app.write_table4_1(3, 4, i_start*1000.);
 
     for (n, u) in [0.01, 0.1, 1., 2., 5., 10., 20., 50., 100.].into_iter().enumerate() {
         let n = n as i32;
@@ -149,6 +159,7 @@ fn step4_1(app: &mut App) -> f32 {
         app.write_table4_1(n, 0, vm);
 
         app.sa8();
+        app.sleep(100);
         let vm = app.mem.vm()*1000.;
         app.write_table4_1(n, 1, vm);
 
@@ -159,6 +170,7 @@ fn step4_1(app: &mut App) -> f32 {
 
     app.set_kia_to(KIA::DIGIT);
     app.set_sas([0, 0, 0, 0, 0, 0, 0, 2]);
+    app.set_vg_to(0.000_01);
     app.find_volt_by_vg1(0.12);
 
     let vg = app.mem.vg()*1000.;
@@ -169,6 +181,10 @@ fn step4_1(app: &mut App) -> f32 {
     app.write_table4_1(3, 6, kg);
     app.set_kia_to(KIA::DIGIT);
 
+    app.open_table(3);
+    app.final_table();
+    app.close_tabl();
+
     println!("step4_1 time: {:?}", st.elapsed());
     i_start
 }
@@ -178,6 +194,9 @@ fn step4_2(app: &mut App) {
     app.set_m_to(30);
     app.set_vg_to(0.001);
     find_max_volt_from_fv1(app);
+
+    let f0 = app.mem.fv();
+    app.write_table4_2(4, 4, f0/1000.);
 
     for (n, u) in [0.01, 0.1, 1., 2., 5., 10., 20., 50., 100.].into_iter().enumerate() {
         let n = n as i32;
@@ -191,9 +210,10 @@ fn step4_2(app: &mut App) {
         app.write_table4_2(n, 0, vm);
 
         let i = app.mem.i8()*1000.;
-        app.write_table4_2(n, 3, vm);
+        app.write_table4_2(n, 3, i);
 
         app.sa8();
+        app.sleep(100);
         let vm = app.mem.vm()*1000.;
         app.write_table4_2(n, 1, vm);
 
@@ -214,6 +234,10 @@ fn step4_2(app: &mut App) {
     app.write_table4_2(3, 6, kg);
     app.set_kia_to(KIA::DIGIT);
 
+    app.open_table(4);
+    app.final_table();
+    app.close_tabl();
+
     println!("step4_2 time: {:?}", st.elapsed());
 }
 fn step4_3_to_5(app: &mut App) {
@@ -232,6 +256,11 @@ fn step4_3_to_5(app: &mut App) {
             let i = app.mem.i8()*1000.;
             app.write_table4_3_5(table, n, 1, i);
         }
+        let indx = ((table + 2) % 7) as i32;
+
+        app.open_table(indx);
+        app.final_table();
+        app.close_tabl();
     };
 
     let st = Instant::now();
@@ -268,8 +297,10 @@ fn step4_6(app: &mut App, i_start: f32) {
 
     app.set_vg_to(0.000_1);
     app.set_sas([1, 0,0,0,0,0,0,0]);
+    app.sleep(100);
     let vm1 = app.mem.vm()*1000.;
     app.set_sas([2, 0,0,0,0,0,0,0]);
+    app.sleep(100);
     let vm2 = app.mem.vm()*1000.;
     app.write_table4_6(4, 3, vm1);
     app.write_table4_6(4, 4, vm2);
@@ -292,6 +323,9 @@ fn step4_6(app: &mut App, i_start: f32) {
         app.write_table4_6(n, 1, kg);
     }
 
+    app.open_table(1);
+    app.final_table();
+    app.close_tabl();
     println!("step4_6 time: {:?}", st.elapsed());
 }
 fn step4_7(app: &mut App) {
@@ -316,7 +350,7 @@ fn step4_7(app: &mut App) {
         app.set_sas([0, 0, 0, 0, 0, 0, 0, 1]);
 
         let vm = app.mem.vm()*1000.;
-        if n == 2{
+        if n == 4{
             min_u = vm;
         }
         else if n == 8{
@@ -325,7 +359,7 @@ fn step4_7(app: &mut App) {
         app.write_table4_7(n, 0, vm);
 
         app.sa8();
-
+        app.sleep(100);
         let vm = app.mem.vm()*1000.;
         app.write_table4_7(n, 1, vm);
 
@@ -334,10 +368,15 @@ fn step4_7(app: &mut App) {
         app.write_table4_7(n, 2, kg);
     }
 
-    let k_reg = 20.*(min_u/max_u).log10()+40.;
+    let k_reg = 20.*(20./min_u/max_u).log10();
 
+    #[cfg(debug_assertions)]
+    println!("k_reg: {}", k_reg);
     app.write_table4_7(4, 4, k_reg);
 
+    app.open_table(2);
+    app.final_table();
+    app.close_tabl();
     println!("step4_7 time: {:?}", st.elapsed());
 }
 fn step5(app: &mut App) {
@@ -368,6 +407,9 @@ fn step5(app: &mut App) {
     app.sa4();
     doing(app, 1);
 
+    app.open_table(5);
+    app.final_table();
+    app.close_tabl();
     println!("step5 time: {:?}", st.elapsed());
 }
 
@@ -425,9 +467,19 @@ fn main() {
     {
         step1(&mut app);
         step2(&mut app);
+        step3(&mut app);
+        let i_st = step4_1(&mut app);
+        step4_2(&mut app);
+        step4_3_to_5(&mut app);
+        step4_6(&mut app, i_st);
+        step4_7(&mut app);
+        step5(&mut app);
     }
     #[cfg(debug_assertions)]
     {
+
+        step1(&mut app);
+        step2(&mut app);
         step3(&mut app);
         let i_st = step4_1(&mut app);
         step4_2(&mut app);

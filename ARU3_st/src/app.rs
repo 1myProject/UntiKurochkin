@@ -83,6 +83,8 @@ impl App {
         //kia to digit
         self.set_kia_to(KIA::INI);
         self.set_kia_to(KIA::DIGIT);
+
+        self.set_fv1(1);
     }
 
     pub fn set_kia_to(&mut self, kia: KIA) {
@@ -101,9 +103,9 @@ impl App {
             KIA::DIGIT => {
                 self.click(303, 60);
                 self.sleep(100);
-                self.click(414, 60);
+                self.click(414, 81);
                 self.sleep(100);
-                self.click(742, 662);
+                self.click(890, 687);
                 self.cur_kia = KIA::DIGIT
             }
         }
@@ -117,7 +119,7 @@ impl App {
             self.sleep(1)
         }
     }
-
+    #[inline]
     pub fn waiter_1sec_while_vm(&self, v: f32) {
         self.waiter_1sec_while(|| v != self.mem.vm());
     }
@@ -158,8 +160,6 @@ impl App {
 
     fn set_vg(&mut self, indx: i32) {
         let v = self.mem.vg();
-        #[cfg(debug_assertions)]
-        println!("{}", 545 + indx * 24);
         self.click(265, 545 + indx * 24);
         self.waiter_1sec_while(|| v != self.mem.vg());
     }
@@ -199,7 +199,8 @@ impl App {
     pub fn find_volt_by_vg1(&mut self, v_find: f32) {
         let mut last: Option<bool> = None;
         let mut vm_r = self.mem.vm_round();
-        let mut vec = Vec::new();
+        let mut vec =[0.0; 6];
+        let mut n = 0;
         while (vm_r - v_find).abs() > 0.00001 {
             let last_vg = self.mem.vg();
             let diff = (vm_r - v_find).abs();
@@ -223,25 +224,30 @@ impl App {
 
             self.waiter_1sec_while(|| vm != self.mem.vm());
             vm_r = self.mem.vm_round();
-            vec.push(vm_r);
-            if vec.len() > 6 {
-                vec.remove(0);
-                let v1 = vec[0];
-                let v2 = vec[1];
-                if v1 != v2 && [vec[2], vec[4]].contains(&v1) && [vec[3], vec[5]].contains(&v2) {
-                    break;
-                }
+            vec[n%6] = vm_r;
+            n+=1;
+            let v1 = vec[0];
+            let v2 = vec[1];
+            if v1 != v2 && [vec[2], vec[4]].contains(&v1) && [vec[3], vec[5]].contains(&v2) {
+                break;
             }
+            // vec.push(vm_r);
+            // if vec.len() > 6 {
+            //     vec.remove(0);
+            //
+            // }
 
             let vg = self.mem.vg();
             if vg.log10().round() == vg.log10() {
-                let indx = 5 + vg.log10() as i32;
-                if vg - last_vg >= 0. {
+                let vg_log = vg.log10()as i32;
+                let indx = 6 +  vg_log;
+                if vg - last_vg > 0. {
                     self.set_vg(indx);
-                } else {
+                } else if vg - last_vg <= 0. {
                     self.set_vg(indx - 1);
                 }
-                vm_r = self.mem.vm();
+                self.waiter_1sec_while(|| vg != self.mem.vg());
+                vm_r = self.mem.vm_round();
             }
         }
 
@@ -619,29 +625,47 @@ impl App {
             volt = self.mem.vm();
         }
 
-        let mut dif = 100.0f32;
-        let mut last = None;
-        while (volt - 0.5).abs() < dif {
-            dif = (volt - 0.5).abs();
+        while volt > 0.5{
             let r = self.mem.r8();
             if volt < 0.5 {
                 up(self);
-                // self.scroll_r8_down()
             } else {
                 down(self);
-                // self.scroll_r8_up();
             }
-            last = Some(volt < 0.5);
             self.waiter_1sec_while(|| r != self.mem.r8());
 
             self.sleep(10);
             volt = self.mem.vm();
         }
 
-        match last {
-            Some(true) => down(self),
-            Some(false) => up(self),
-            None => (),
+        let mut difs = [0.0; 3];
+        let vm = self.mem.vm();
+        difs[1] = (0.5 - vm).abs();
+
+        self.scroll_r8_down();
+        self.waiter_1sec_while_vm(vm);
+        let vm = self.mem.vm();
+        difs[2] = (0.5 - vm).abs();
+
+        self.scroll_r8_up();
+        self.waiter_1sec_while_vm(vm);
+        let vm = self.mem.vm();
+        self.scroll_r8_up();
+        self.waiter_1sec_while_vm(vm);
+        difs[0] = (0.5 - self.mem.vm()).abs();
+
+        let min = match difs.iter().min_by(float_order) {
+            Some(a) => *a,
+            None => {
+                self.scroll_r8_down(); //return to first position
+                return;
+            }
+        };
+        if let Some(pos) = difs.iter().position(|&x| x == min) {
+            for _ in 0..pos {
+                self.scroll_r8_down();
+                self.sleep(10);
+            }
         }
     }
 
@@ -773,15 +797,16 @@ impl App {
     }
 
     pub fn write_table4_3_5(&mut self, table: u32,  col: i32, row: i32, val: f32) {
-        let indx = match table {
-            3=>7,
-            4=>8,
-            5=>0,
-            _=>7,
-        };
+        let indx = ((table + 2) % 7) as i32;
+        // let indx = match table {
+        //     3=>5,
+        //     4=>6,
+        //     5=>0,
+        //     _=>7,
+        // };
         self.open_table(indx);
 
-        self.write_tabl4_2_call(col, row, val);
+        self.write_tabl4_3_5_call(col, row, val);
 
         self.close_tabl();
     }
@@ -789,14 +814,14 @@ impl App {
     pub fn write_table4_6(&mut self, col: i32, row: i32, val: f32) {
         self.open_table(1);
 
-        self.write_tabl4_1_call(col, row, val);
+        self.write_tabl4_6_call(col, row, val);
 
         self.close_tabl();
     }
     pub fn write_table4_7(&mut self, col: i32, row: i32, val: f32) {
         self.open_table(2);
 
-        self.write_tabl4_1_call(col, row, val);
+        self.write_tabl4_7_call(col, row, val);
 
         self.close_tabl();
     }

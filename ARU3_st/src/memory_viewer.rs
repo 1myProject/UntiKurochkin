@@ -4,7 +4,9 @@ use std::process::exit;
 use std::ptr::null_mut;
 use std::{thread, time};
 use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
-use windows_sys::Win32::System::Diagnostics::Debug::ReadProcessMemory;
+use windows_sys::Win32::System::Diagnostics::Debug::{
+    ReadProcessMemory, WriteProcessMemory,
+};
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
     CreateToolhelp32Snapshot, Module32First, Module32Next, Process32First, Process32Next,
     MODULEENTRY32, PROCESSENTRY32, TH32CS_SNAPMODULE, TH32CS_SNAPMODULE32, TH32CS_SNAPPROCESS,
@@ -15,6 +17,7 @@ use windows_sys::Win32::System::Threading::{
 
 const SA_ADRR: usize = 0x006321DC;
 const VM_ADRR: usize = 0x00632080;
+const VM_MAX_ADRR: usize = 0x00632084;
 const FV_ADRR: usize = 0x0063210C;
 const VG_ADRR: usize = 0x00632090;
 const M_ADRR: usize = 0x00632114;
@@ -92,6 +95,8 @@ impl Meme {
             exit(5);
         }
 
+        mem.set_vm_max();
+
         mem
     }
 
@@ -140,6 +145,11 @@ impl Meme {
         thread::sleep(time::Duration::from_millis(1));
 
         self.read(VM_ADRR)
+    }
+
+    fn set_vm_max(&self){
+        let vm = 100.0f32;
+        write(self.handle, VM_MAX_ADRR, &vm)
     }
 
     pub fn vm_round(&self) -> f32{
@@ -300,6 +310,32 @@ fn read<T: ?Sized>(h_process: HANDLE, addr: usize, buf: &mut T) {
     }
 }
 
+fn write<T>(h_process: HANDLE, addr: usize, buf: &T) {
+    let bytes = size_of_val(buf);
+    let mut bytes_read: usize = 0;
+
+    #[cfg(debug_assertions)]
+    println!("записываю по адресу 0x{:X}", addr);
+
+    unsafe {
+        let ok = WriteProcessMemory(
+            h_process,
+            addr as *const _,
+            buf as *const _ as *const _,
+            bytes,
+            &mut bytes_read,
+        );
+
+        if ok == 0 || bytes_read != bytes {
+            eprintln!(
+                "Ошибка ReadProcessMemory: {}",
+                windows_sys::Win32::Foundation::GetLastError()
+            );
+            press_enter_for_exit();
+            exit(4);
+        }
+    }
+}
 pub fn press_enter_for_exit() {
     // println!("Press Enter for exit...");
     io::stdout().flush().unwrap();
