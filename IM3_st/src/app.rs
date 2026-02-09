@@ -1,5 +1,5 @@
 use crate::memory_viewer::{press_enter_for_exit, Meme, SA_COUNT};
-use crate::open_windows::{get_pos_maket, get_pos_open_table};
+use crate::open_windows::{get_pos_etap6, get_pos_maket, get_pos_open_table};
 use enigo::Button::Left;
 use enigo::Coordinate::Abs;
 use enigo::Direction::{Press, Release};
@@ -103,6 +103,24 @@ impl App {
             }
         }
         self.cur_kia = kia;
+    }
+    pub fn set_to_maket2(&mut self) {
+        self.click(183, 37);
+        self.sleep(100);
+        self.click(228, 102);
+        self.sleep(100);
+        self.click(821, 104);
+        self.sleep(100);
+
+        self.waiter_1sec_while(|| (0, 0) != get_pos_etap6().pos());
+
+        let (xo, yo) = get_pos_etap6().pos();
+
+        self.enigo.move_mouse(xo + 358, yo + 235, Abs).unwrap();
+        self.enigo.button(Button::Left, Press).unwrap();
+        self.enigo.button(Button::Left, Release).unwrap();
+        self.sleep(200);
+        self.waiter_1sec_while(|| false != get_pos_maket().is_active);
     }
 
     pub fn waiter_1sec_while(&self, fun: impl Fn() -> bool) {
@@ -830,7 +848,8 @@ impl App {
     pub fn write_table5(&mut self, col: i32, row: i32, val: f64) {
         self.open_table(0);
 
-        self.write_tabl1_5_call(0, col, row, val);
+        let sa2 = self.mem.sa()[5];
+        self.write_tabl1_5_call(sa2, col, row, val);
 
         self.close_tabl();
     }
@@ -850,13 +869,14 @@ impl App {
 
         self.close_tabl();
     }
-    fn write_tabl1_5_call(&mut self, sa1: i16, col: i32, row: i32, val: f64) {
+    fn write_tabl1_5_call(&mut self, sa: i16, col: i32, row: i32, val: f64) {
         let text = format!("{val:.1}");
         let mut x = 139;
         let mut y = 138;
-        if sa1 % 2 == 0 {
+        if sa % 2 == 0 {
             x += 345;
-        } else if sa1 == 1 {
+        }
+        if sa > 2 {
             y += 225;
         }
         self.click_table(x + col * 80, y + row * 33);

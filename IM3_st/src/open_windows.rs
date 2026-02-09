@@ -1,7 +1,10 @@
 use std::ffi::OsString;
 use std::os::windows::prelude::*;
 use windows_sys::Win32::Foundation::{HWND, RECT};
-use windows_sys::Win32::UI::WindowsAndMessaging::{EnumWindows, GetForegroundWindow, GetWindowRect, GetWindowTextLengthW, GetWindowTextW, IsWindowVisible};
+use windows_sys::Win32::UI::WindowsAndMessaging::{
+    EnumWindows, GetForegroundWindow, GetWindowRect, GetWindowTextLengthW, GetWindowTextW,
+    IsWindowVisible,
+};
 
 #[derive(Default)]
 pub struct WinInf {
@@ -24,6 +27,10 @@ pub fn get_pos_was_saved() -> WinInf {
 #[inline]
 pub fn get_pos_open_table() -> WinInf {
     get_pos_window("Результаты измерения")
+}
+#[inline]
+pub fn get_pos_etap6() -> WinInf {
+    get_pos_window("Этап 6")
 }
 
 #[inline]

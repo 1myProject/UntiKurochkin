@@ -26,8 +26,8 @@ const M_ADRR: usize = BASE + 0x0D0;
 const FM_ADRR: usize = BASE + 0x0C8;
 const Q_ADRR: usize = BASE + 0x1C0;
 const FI_ADRR: usize = BASE + 0x1B4;
-const Tust2_ADRR: usize = VM_ADRR+0x11C;
-const Tdspad_ADRR: usize = VM_ADRR+0x10C;
+const Tust2_ADRR: usize = VM_ADRR + 0x11C;
+const Tdspad_ADRR: usize = VM_ADRR + 0x10C;
 
 pub struct Meme {
     handle: HANDLE,
@@ -110,7 +110,7 @@ impl Meme {
             f = true;
         }
         let fm = self.fm();
-        if fm!=0. && !(10.0..=20_000.).contains(&fm) {
+        if fm != 0. && !(10.0..=20_000.).contains(&fm) {
             println!("Подозрительная модулирующая частота Генератора");
             f = true;
         }
@@ -161,10 +161,10 @@ impl Meme {
     //     write(self.handle, VM_MAX_ADRR, &vm)
     // }
 
-    pub fn vm_round(&self) -> f64{
+    pub fn vm_round(&self) -> f64 {
         let volt = self.vm();
         const ZERS: f64 = 10_000.;
-        (volt*ZERS).round()/ZERS
+        (volt * ZERS).round() / ZERS
     }
 
     #[inline]
@@ -196,19 +196,19 @@ impl Meme {
     pub fn fi(&self) -> u32 {
         self.read(FI_ADRR)
     }
-    
+
     #[inline]
     pub fn tust2(&self) -> f64 {
         self.read(Tust2_ADRR)
     }
-    
+
     #[inline]
     pub fn tdspad(&self) -> f64 {
         self.read(Tdspad_ADRR)
     }
 
-    fn read<T: Default>(&self, addr:usize) -> T {
-        let mut a:T = Default::default();
+    fn read<T: Default>(&self, addr: usize) -> T {
+        let mut a: T = Default::default();
         read(self.handle, addr, &mut a);
         a
     }
