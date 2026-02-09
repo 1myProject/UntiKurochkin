@@ -99,32 +99,29 @@ pub fn find_max_volt_from_fv1(app: &mut App) -> f64 {
 //     volt
 // }
 
-// pub fn find_volt_from_fv1_plus(app: &mut App, find_volt: f32, revers: bool) -> f32 {
-//     let mut volt = 0.;
-//     for _ in 0..10000 {
-//         if revers {
-//             app.fv1_less();
-//         } else {
-//             app.fv1_more();
-//         }
-//         let v = app.mem.vm();
-//         if v < find_volt {
-//             if !revers {
-//                 app.fv1_less();
-//             } else {
-//                 app.fv1_more();
-//             }
-//             break;
-//         }
-//         volt = v;
-// 
-//         let f = app.mem.fv() / 1000.;
-//         for (n, i) in [300., 1000., 3000.].into_iter().enumerate() {
-//             if f == i {
-//                 let indx = if revers { n } else { n + 1 } as i32;
-//                 app.set_fv1(indx);
-//             }
-//         }
-//     }
-//     volt
-// }
+pub fn find_volt_from_fv1_plus(app: &mut App, find_volt: f64, revers: bool) {
+    for _ in 0..10000 {
+        if revers {
+            app.fv1_less();
+        } else {
+            app.fv1_more();
+        }
+        let v = app.mem.vm();
+        if v < find_volt {
+            if !revers {
+                app.fv1_less();
+            } else {
+                app.fv1_more();
+            }
+            break;
+        }
+
+        let f = app.mem.fv() / 1000.;
+        for (n, i) in [300., 1000., 3000.].into_iter().enumerate() {
+            if f == i {
+                let indx = if revers { n } else { n + 1 } as i32;
+                app.set_fv1(indx);
+            }
+        }
+    }
+}

@@ -1,4 +1,3 @@
-use std::arch::is_loongarch_feature_detected;
 use crate::app::{App, KIA};
 use crate::memory_viewer::Meme;
 use crate::step_helper::{find_max_volt_from_fv1, find_volt_from_fv1_plus};
@@ -414,6 +413,7 @@ fn step5(app: &mut App) {
 }
 
 fn main() {
+    let mem: Meme;
     {
         #[cfg(debug_assertions)]
         unsafe {
@@ -444,10 +444,12 @@ fn main() {
         println!("\n\"приветствуются багрепорты, не приветствуются предложения\"");
         println!("Если прога застряла или зациклилась на одном месте нажмите ESC, чтоб экстренно завершить прогамму");
         println!("Для issuе: https://t.me/morinosenshi или чекните новую версию в https://github.com/1myProject/UntiKurochkin/releases/tag/aru");
+        println!("и пишите разрабу только в последнюю очередь, эта прога может заработать и с новыми версиями лаб, просто проверте.");
         println!("\nтекущая версия программы для лабы по АРУ от 12 января\n");
         let mut arr = ["мой папа", "Илон Маск", "огурчик Рик", "Анимешник"];
         arr.shuffle(&mut rand::rng());
 
+        mem = Meme::new();
         // println!("{arr:?}");
         println!("нажмите Enter если ты {})", arr[0]);
         #[cfg(not(debug_assertions))]
@@ -456,7 +458,6 @@ fn main() {
 
     let st = Instant::now();
 
-    let mem = Meme::new();
     let mut app = App::new(mem);
 
     println!("Приступаю к выполнению");

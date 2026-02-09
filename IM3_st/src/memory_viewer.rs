@@ -26,7 +26,8 @@ const M_ADRR: usize = BASE + 0x0D0;
 const FM_ADRR: usize = BASE + 0x0C8;
 const Q_ADRR: usize = BASE + 0x1C0;
 const FI_ADRR: usize = BASE + 0x1B4;
-// const I6_ADRR: usize = 0x0063222C;
+const Tust2_ADRR: usize = VM_ADRR+0x11C;
+const Tdspad_ADRR: usize = VM_ADRR+0x10C;
 
 pub struct Meme {
     handle: HANDLE,
@@ -194,6 +195,16 @@ impl Meme {
     #[inline]
     pub fn fi(&self) -> u32 {
         self.read(FI_ADRR)
+    }
+    
+    #[inline]
+    pub fn tust2(&self) -> f64 {
+        self.read(Tust2_ADRR)
+    }
+    
+    #[inline]
+    pub fn tdspad(&self) -> f64 {
+        self.read(Tdspad_ADRR)
     }
 
     fn read<T: Default>(&self, addr:usize) -> T {
