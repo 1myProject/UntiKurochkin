@@ -138,7 +138,7 @@ fn step4(app: &mut App) {
     app.sa_num(3);
     app.write_table4(2, tust, tdspad);
 
-    println!("step4_1 time: {:?}", st.elapsed());
+    println!("step4 time: {:?}", st.elapsed());
 }
 fn step5(app: &mut App) {
     let st = Instant::now();
@@ -183,15 +183,83 @@ fn step5(app: &mut App) {
         app.write_table5(1, 3, k_pr / 1000.);
     }
 
-    println!("step4_2 time: {:?}", st.elapsed());
+    println!("step5 time: {:?}", st.elapsed());
 }
+#[warn(non_snake_case)]
+fn tau(Teta: f64, Foo: f64, Qk: f64, n: f64) -> f64 {
+    let pfq = PI * Foo / Qk;
+    let teta_2 = Teta * Teta;
+    let teta_2_m_1 = 1.0 - teta_2;
+    let teta_2_p_1 = 1.0 + teta_2;
+    let a = 2f64.powf(1.0 / n) - 1.0;
+    let tta = teta_2_m_1 * teta_2_m_1 + teta_2_p_1 * teta_2_p_1 * a;
+
+    1.0 / (pfq * (tta.sqrt() - teta_2_m_1).sqrt())
+}
+#[warn(non_snake_case)]
 fn step6(app: &mut App) {
     let st = Instant::now();
-    println!("step4_3_to_5 time: {:?}", st.elapsed());
+    app.set_sas([0, 0, 0, 0, 1, 1, 1]);
+    app.to_impl();
+    app.q_to(2.);
+    app.fi_to(5);
+    app.set_vg_to(0.1);
+    find_max_volt_from_fv1(app);
+
+    app.set_kia_to(KIA::OSC);
+
+    let Qk = app.mem.qk();
+    let Csv = app.mem.csv();
+    let Lk = app.mem.lk();
+    let Ck = app.mem.ck();
+
+    const ARR: [f64; 3] = [6.0e-10, 1.2e-09, 0.0];
+    for (n, Csvd) in ARR.iter().enumerate() {
+        app.set_sas([0,0,0,0,n as i16+1,0,0]);
+
+        let Teta = Qk * (Csv + Csvd) / (Csv + Csvd + Ck);
+        let Foo = 1. / (2. * PI * (Lk * (Ck + Csv + Csvd)).sqrt());
+
+        let k = if n == 1 { 2.3 } else { PI };
+        let t = tau(Teta, Foo, Qk, 1.) * 1000000. * k;
+
+        app.write_table6(n as i32, t)
+    }
+
+    println!("step6 time: {:?}", st.elapsed());
 }
+#[warn(non_snake_case)]
 fn step7(app: &mut App) {
     let st = Instant::now();
-    println!("step4_6 time: {:?}", st.elapsed());
+    app.set_sas([0, 0, 0, 0, 1, 5, 1]);
+    app.to_impl();
+    app.q_to(2.0);
+    app.fi_to(5);
+    app.set_vg_to(0.001);
+    find_max_volt_from_fv1(app);
+
+    app.set_kia_to(KIA::OSC);
+
+    let Qk = app.mem.qk();
+    let Csv = app.mem.csv();
+    let Lk = app.mem.lk();
+    let Ck = app.mem.ck();
+
+    let tdspad = app.mem.tdspad()*2.2*1000000.;
+    const ARR: [f64; 3] = [0.0000000006, 1.2e-09, 0.0];
+    for (n, Csvd) in ARR.iter().enumerate() {
+        app.set_sas([0,0,0,0,n as i16+1,0,0]);
+
+        let Teta = Qk * (Csv + Csvd) / (Csv + Csvd + Ck);
+        let Foo = 1. / (2. * PI * (Lk * (Ck + Csv + Csvd)).sqrt());
+
+        let t = tau(Teta, Foo, Qk, 1.) * 1000000. * 2.2;
+
+        app.write_table7(n as i32, 0, t);
+        app.write_table7(n as i32, 1, tdspad);
+    }
+
+    println!("step7 time: {:?}", st.elapsed());
 }
 fn main() {
     let mem: Meme;

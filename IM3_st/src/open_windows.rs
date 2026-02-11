@@ -26,7 +26,7 @@ pub fn get_pos_was_saved() -> WinInf {
 }
 #[inline]
 pub fn get_pos_open_table() -> WinInf {
-    get_pos_window("Результаты измерения")
+    get_pos_window("Результаты эксперимента")
 }
 #[inline]
 pub fn get_pos_etap6() -> WinInf {

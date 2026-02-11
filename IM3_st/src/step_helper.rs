@@ -4,11 +4,6 @@ pub fn find_max_volt_from_fv1(app: &mut App) -> f64 {
     let mut volt = app.mem.vm();
     loop {
         let v = app.mem.vm();
-        if v > 3.4 {
-            app.set_vg_to(0.1);
-            app.waiter_1sec_while_vm(v);
-            continue;
-        }
         app.fv1_more();
         app.waiter_1sec_while_vm(v);
 
@@ -20,19 +15,13 @@ pub fn find_max_volt_from_fv1(app: &mut App) -> f64 {
         volt = v;
 
         match app.mem.fv() {
-            300_000. => app.set_fv1(1),
-            1000_000. => app.set_fv1(2),
+            1_000_000. => app.set_fv1(1),
             _ => (),
         }
     }
     let mut volt = app.mem.vm();
     loop {
         let v = app.mem.vm();
-        // if v>3.4 {
-        //     app.set_vg_to(0.1);
-        //     app.waiter_1sec_while_vm(v);
-        //     continue;
-        // }
         app.fv1_less();
         app.waiter_1sec_while_vm(v);
 
@@ -44,15 +33,11 @@ pub fn find_max_volt_from_fv1(app: &mut App) -> f64 {
         volt = v;
 
         match app.mem.fv() {
-            300_000. => {
+            1_000_000. => {
                 app.set_fv1(0);
                 app.fv_to_max();
             }
-            1000_000. => {
-                app.set_fv1(1);
-                app.fv_to_max();
-            }
-            100_000. => break,
+            300_000. => break,
             _ => (),
         }
     }

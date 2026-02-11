@@ -26,8 +26,14 @@ const M_ADRR: usize = BASE + 0x0D0;
 const FM_ADRR: usize = BASE + 0x0C8;
 const Q_ADRR: usize = BASE + 0x1C0;
 const FI_ADRR: usize = BASE + 0x1B4;
+
 const Tust2_ADRR: usize = VM_ADRR + 0x11C;
 const Tdspad_ADRR: usize = VM_ADRR + 0x10C;
+const Forma_ADDR: usize = BASE+0x390;
+const Lk_ADDR: usize = Forma_ADDR+0x264;
+const Ck_ADDR: usize = Forma_ADDR+0x268;
+const Csv_ADDR: usize = Forma_ADDR+0x27C;
+const Qk_ADDR: usize = Forma_ADDR+0x28C;
 
 pub struct Meme {
     handle: HANDLE,
@@ -207,6 +213,26 @@ impl Meme {
         self.read(Tdspad_ADRR)
     }
 
+    #[inline]
+    pub fn lk(&self) -> f64 {
+        self.read::<f32>(Lk_ADDR) as f64
+    }
+
+    #[inline]
+    pub fn ck(&self) -> f64 {
+        self.read::<f32>(Ck_ADDR) as f64
+    }
+
+    #[inline]
+    pub fn csv(&self) -> f64 {
+        self.read::<f32>(Csv_ADDR) as f64
+    }
+
+    #[inline]
+    pub fn qk(&self) -> f64 {
+        self.read::<i16>(Qk_ADDR) as f64
+    }
+
     fn read<T: Default>(&self, addr: usize) -> T {
         let mut a: T = Default::default();
         read(self.handle, addr, &mut a);
@@ -340,70 +366,4 @@ pub fn press_enter_for_exit() {
 
     let mut buffer = String::new();
     let _ = io::stdin().read_line(&mut buffer);
-}
-
-#[cfg(debug_assertions)]
-pub fn modultest(arr: [f32; 10]) {
-    const PROC_NAME: &str = "LabConvertor2.exe";
-    println!("Ищу процесс: {}", PROC_NAME);
-
-    let pid = loop {
-        match find_process_id(PROC_NAME) {
-            Some(id) => break id,
-            None => {
-                eprintln!("Процесс '{}' не найден", PROC_NAME);
-                println!("перед тем как начнем. Запустите лабораторную");
-                press_enter_for_exit();
-                continue;
-                // press_enter_for_exit();
-                // exit(1);
-            }
-        }
-    };
-    #[cfg(debug_assertions)]
-    println!("PID = {}", pid);
-
-    let _base = match get_module_base(pid, PROC_NAME) {
-        Some(addr) => addr,
-        None => {
-            eprintln!(
-                "Модуль '{}' не найден в процессе {} (мэйби надо запустить с админкой)",
-                PROC_NAME, pid
-            );
-            press_enter_for_exit();
-            exit(2);
-        }
-    };
-
-    #[cfg(debug_assertions)]
-    println!("Базовый адрес модуля = 0x{_base:X}");
-
-    let h = unsafe {
-        let h_process = OpenProcess(
-            PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION,
-            0,
-            pid,
-        );
-        if h_process == null_mut() {
-            eprintln!(
-                "Ошибка OpenProcess: {}",
-                windows_sys::Win32::Foundation::GetLastError()
-            );
-            exit(3);
-        }
-        h_process
-    };
-
-    for (n, i) in [
-        0xc4, 0xdc, 0xec, 0x180, 0x228, 0x258, 0x25c, 0x264, 0x26c, 0x270,
-    ]
-    .iter()
-    .enumerate()
-    {
-        let mut f = 0f32;
-        read(h, 0x00607000 + i, &mut f);
-        let d = arr[n];
-        let diff = f - d;
-        println!("{f:<20}|{d:<20}|{diff}")
-    }
 }

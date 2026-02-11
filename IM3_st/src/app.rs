@@ -140,6 +140,7 @@ impl App {
 
 const MORE: i32 = 254;
 const MORE_MORE: i32 = 246;
+const MORE_MORE: i32 = 245;
 const LESS: i32 = 164;
 const LESS_LESS: i32 = 180;
 //volt GS
@@ -855,9 +856,12 @@ impl App {
     }
 
     pub fn write_table6(&mut self, col: i32, row: i32, val: f64) {
+    pub fn write_table6(&mut self, col: i32, val: f64) {
         self.open_table(1);
 
         self.write_tabl2_4_6_7_call(col, row, val);
+        self.write_tabl2_4_6_7_call(col, 0, val);
+        self.write_tabl2_4_6_7_call(col, 1, val);
 
         self.close_tabl();
     }
