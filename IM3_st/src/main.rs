@@ -1,4 +1,4 @@
-use crate::app::{App, KIA};
+use crate::app::App;
 use crate::memory_viewer::Meme;
 use crate::step_helper::{find_max_volt_from_fv1, find_volt_from_fv1_plus};
 #[cfg(not(debug_assertions))]
@@ -12,22 +12,23 @@ mod memory_viewer;
 mod open_windows;
 mod step_helper;
 
-fn step1(app: &mut App) -> [f64; 4] {
+fn step1(app: &mut App) -> (f64, [f64; 4]) {
     let st = Instant::now();
     app.set_sas([1, 2, 0, 1, 0, 0, 0]);
-    app.set_fv1_to(500_000.);
     app.set_vg_to(0.001);
     app.to_nepr();
-    app.set_m_to(0);
 
     let mut dfs_07 = [0.0; 4];
 
+    app.set_fv1_to(500_000.);
+    find_max_volt_from_fv1(app);
+    let fv = app.mem.fv();
+
     for i in 0..4 {
-        find_max_volt_from_fv1(app);
+        app.set_fv1_to(fv);
 
         let k0 = app.mem.vm();
         app.write_table1(1, 4, k0 * 1000.);
-        let fv = app.mem.fv();
         app.write_table1(2, 0, fv / 1000.);
 
         find_volt_from_fv1_plus(app, k0 * 0.707, true);
@@ -56,41 +57,53 @@ fn step1(app: &mut App) -> [f64; 4] {
         app.write_table1(0, 2, df_01 / 1000.);
 
         let k_pr = df_01 / df_07;
-        app.write_table1(1, 3, k_pr / 1000.);
+        app.write_table1(1, 3, k_pr);
         app.sa_num(1);
     }
+
+    app.sa_num(1);
+    app.open_table(0);
+    app.final_table();
+    app.close_tabl();
     println!("step1 time: {:?}", st.elapsed());
-    dfs_07
+    (fv, dfs_07)
 }
-fn step2(app: &mut App, dfs_07: [f64; 4]) {
+fn step2(app: &mut App, fv: f64, dfs_07: [f64; 4]) {
     let st = Instant::now();
     app.set_sas([1, 2, 0, 1, 0, 0, 0]);
     app.to_impl();
     app.fi_to(5);
     app.q_to(2.5);
 
-    app.set_kia_to(KIA::OSC);
+    app.set_fv1_to(fv);
+    // app.set_kia_to(KIA::OSC);
     for (n, &df) in dfs_07.iter().enumerate() {
-        let n = n as i32;
-        find_max_volt_from_fv1(app);
-
         let t = 2.2 / PI * 1_000_000.0 / df;
-        app.write_table2(n, t);
+        let t = t - t % 1.5;
+        app.write_table2(n as i32, t);
 
         app.sa_num(1);
+        app.sleep(800);
     }
 
+    app.sa_num(1);
+    app.open_table(1);
+    app.final_table();
+    app.close_tabl();
     println!("step2 time: {:?}", st.elapsed());
 }
 fn step3(app: &mut App) {
     let doing = |app: &mut App, row_mod: i32| {
         for sa3 in 0..3 {
-            let v = [0.0; 2];
+            let mut v = [0.0; 2];
             for sa2 in 0..2 {
-                app.set_sas([0, 2 - sa2 as i16, sa3 as i16 + 1, 0, 0, 0, 0]);
+                app.set_sas([0, 2 - sa2, sa3 as i16 + 1, 0, 0, 0, 0]);
+                app.sleep(500);
 
                 let vm = app.mem.vm();
-                app.write_table3(sa3, row_mod * 3 + sa2, vm * 1000.);
+                v[sa2 as usize] = vm;
+                let row = row_mod * 3 + sa2 as i32;
+                app.write_table3(sa3, row, vm * 1000.);
             }
 
             let r = 0.001 * 5100. / (v[0] / v[1] - 1.);
@@ -102,8 +115,7 @@ fn step3(app: &mut App) {
     app.set_sas([4, 2, 1, 1, 0, 0, 0]);
     app.to_nepr();
     app.set_vg_to(0.002);
-    app.set_m_to(0);
-    app.set_kia_to(KIA::DIGIT);
+    // app.set_kia_to(KIA::DIGIT);
     find_max_volt_from_fv1(app);
 
     doing(app, 0);
@@ -114,29 +126,52 @@ fn step3(app: &mut App) {
 
     doing(app, 1);
 
+    app.open_table(2);
+    app.final_table();
+    app.close_tabl();
+
     println!("step3 time: {:?}", st.elapsed());
 }
 fn step4(app: &mut App) {
+    const WAIT: u64 = 2000;
     let st = Instant::now();
-    app.set_sas([5, 2, 1, 1, 0, 0, 0]);
+    app.set_sas([0, 2, 1, 1, 0, 0, 0]);
     app.to_impl();
     app.fi_to(1);
     app.q_to(2.);
     app.set_vg_to(0.001);
     find_max_volt_from_fv1(app);
+    app.set_sas([5, 2, 1, 1, 0, 0, 0]);
+    app.sleep(WAIT);
 
-    app.set_kia_to(KIA::OSC);
+    // app.set_kia_to(KIA::OSC);
 
     let tust = app.mem.tust2() * 1_000_000.0 * 2.3;
+    let tust = tust - tust % 5.;
     let tdspad = app.mem.tdspad() * 1_000_000.0 * 2.3;
+    let tdspad = tdspad - tdspad % 5.;
 
     app.write_table4(0, tust, tdspad);
 
     app.sa_num(3);
-    app.write_table4(1, 500., 500.);
+    app.sleep(WAIT);
+
+    let answ = (1.0 / app.mem.fi() as f64) * 1_000_000. / 2.0;
+    let answ = answ - answ % 5.;
+    app.write_table4(1, answ, answ);
 
     app.sa_num(3);
+    app.sleep(WAIT);
+
+    let tust = app.mem.tust2() * 1_000_000.0 * 2.3;
+    let tust = tust - tust % 15.;
+    let tdspad = app.mem.tdspad() * 1_000_000.0 * 2.3;
+    let tdspad = tdspad - tdspad % 15.;
     app.write_table4(2, tust, tdspad);
+
+    app.open_table(3);
+    app.final_table();
+    app.close_tabl();
 
     println!("step4 time: {:?}", st.elapsed());
 }
@@ -146,13 +181,15 @@ fn step5(app: &mut App) {
     app.to_nepr();
     app.set_vg_to(0.001);
 
+    app.set_fv1_to(500_000.);
+    find_max_volt_from_fv1(app);
+    let fv = app.mem.fv();
     for sa2 in 0..4 {
         app.set_sas([0, 0, 0, 0, 0, sa2 as i16 + 1, 0]);
-        find_max_volt_from_fv1(app);
+        app.set_fv1_to(fv);
 
         let k0 = app.mem.vm();
         app.write_table5(1, 4, k0 * 1000.);
-        let fv = app.mem.fv();
         app.write_table5(2, 0, fv / 1000.);
 
         find_volt_from_fv1_plus(app, k0 * 0.707, true);
@@ -180,12 +217,16 @@ fn step5(app: &mut App) {
         app.write_table5(0, 2, df_01 / 1000.);
 
         let k_pr = df_01 / df_07;
-        app.write_table5(1, 3, k_pr / 1000.);
+        app.write_table5(1, 3, k_pr);
     }
+
+    app.open_table(0);
+    app.final_table();
+    app.close_tabl();
 
     println!("step5 time: {:?}", st.elapsed());
 }
-#[warn(non_snake_case)]
+#[allow(non_snake_case)]
 fn tau(Teta: f64, Foo: f64, Qk: f64, n: f64) -> f64 {
     let pfq = PI * Foo / Qk;
     let teta_2 = Teta * Teta;
@@ -196,7 +237,7 @@ fn tau(Teta: f64, Foo: f64, Qk: f64, n: f64) -> f64 {
 
     1.0 / (pfq * (tta.sqrt() - teta_2_m_1).sqrt())
 }
-#[warn(non_snake_case)]
+#[allow(non_snake_case)]
 fn step6(app: &mut App) {
     let st = Instant::now();
     app.set_sas([0, 0, 0, 0, 1, 1, 1]);
@@ -206,7 +247,7 @@ fn step6(app: &mut App) {
     app.set_vg_to(0.1);
     find_max_volt_from_fv1(app);
 
-    app.set_kia_to(KIA::OSC);
+    // app.set_kia_to(KIA::OSC);
 
     let Qk = app.mem.qk();
     let Csv = app.mem.csv();
@@ -215,20 +256,31 @@ fn step6(app: &mut App) {
 
     const ARR: [f64; 3] = [6.0e-10, 1.2e-09, 0.0];
     for (n, Csvd) in ARR.iter().enumerate() {
-        app.set_sas([0,0,0,0,n as i16+1,0,0]);
+        app.set_sas([0, 0, 0, 0, n as i16 + 1, 0, 0]);
+        app.sleep(2000);
 
         let Teta = Qk * (Csv + Csvd) / (Csv + Csvd + Ck);
         let Foo = 1. / (2. * PI * (Lk * (Ck + Csv + Csvd)).sqrt());
 
-        let k = if n == 1 { 2.3 } else { PI };
-        let t = tau(Teta, Foo, Qk, 1.) * 1000000. * k;
+        let k: f64 = if n == 1 { 2.3 } else { PI };
+        let mut t = tau(Teta, Foo, Qk, 1.) * 1000000. * k;
+
+        if n == 1 {
+            t = t - t % 1.5;
+        } else {
+            t = t - t % 5.0;
+        }
 
         app.write_table6(n as i32, t)
     }
 
+    app.open_table(1);
+    app.final_table();
+    app.close_tabl();
+
     println!("step6 time: {:?}", st.elapsed());
 }
-#[warn(non_snake_case)]
+#[allow(non_snake_case)]
 fn step7(app: &mut App) {
     let st = Instant::now();
     app.set_sas([0, 0, 0, 0, 1, 5, 1]);
@@ -238,17 +290,18 @@ fn step7(app: &mut App) {
     app.set_vg_to(0.001);
     find_max_volt_from_fv1(app);
 
-    app.set_kia_to(KIA::OSC);
+    // app.set_kia_to(KIA::OSC);
 
     let Qk = app.mem.qk();
     let Csv = app.mem.csv();
     let Lk = app.mem.lk();
     let Ck = app.mem.ck();
 
-    let tdspad = app.mem.tdspad()*2.2*1000000.;
+    let tdspad = app.mem.tdspad() * 2.2 * 1000000.;
     const ARR: [f64; 3] = [0.0000000006, 1.2e-09, 0.0];
     for (n, Csvd) in ARR.iter().enumerate() {
-        app.set_sas([0,0,0,0,n as i16+1,0,0]);
+        app.set_sas([0, 0, 0, 0, n as i16 + 1, 0, 0]);
+        app.sleep(2000);
 
         let Teta = Qk * (Csv + Csvd) / (Csv + Csvd + Ck);
         let Foo = 1. / (2. * PI * (Lk * (Ck + Csv + Csvd)).sqrt());
@@ -258,6 +311,10 @@ fn step7(app: &mut App) {
         app.write_table7(n as i32, 0, t);
         app.write_table7(n as i32, 1, tdspad);
     }
+
+    app.open_table(2);
+    app.final_table();
+    app.close_tabl();
 
     println!("step7 time: {:?}", st.elapsed());
 }
@@ -319,17 +376,26 @@ fn main() {
     app.setup_maket();
 
     #[cfg(not(debug_assertions))]
-    {}
-    #[cfg(debug_assertions)]
     {
-        let dfs = step1(&mut app);
-        step2(&mut app, dfs);
+        let (fv, dfs) = step1(&mut app);
+        step2(&mut app, fv, dfs);
         step3(&mut app);
         step4(&mut app);
         app.set_to_maket2();
         step5(&mut app);
         step6(&mut app);
         step7(&mut app);
+    }
+    #[cfg(debug_assertions)]
+    {
+        // let (fv, dfs) = step1(&mut app);
+        // step2(&mut app, fv, dfs);
+        // step3(&mut app);
+        // step4(&mut app);
+        app.set_to_maket2();
+        // step5(&mut app);
+        // step6(&mut app);
+        // step7(&mut app);
     }
     println!("\nTotal time: {:.3}m", st.elapsed().as_secs_f32() / 60.);
     println!("разрабу на чай (кофе не пью): Белинвест 5578 8433 7104 1785");

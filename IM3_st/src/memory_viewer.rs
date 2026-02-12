@@ -29,11 +29,11 @@ const FI_ADRR: usize = BASE + 0x1B4;
 
 const Tust2_ADRR: usize = VM_ADRR + 0x11C;
 const Tdspad_ADRR: usize = VM_ADRR + 0x10C;
-const Forma_ADDR: usize = BASE+0x390;
-const Lk_ADDR: usize = Forma_ADDR+0x264;
-const Ck_ADDR: usize = Forma_ADDR+0x268;
-const Csv_ADDR: usize = Forma_ADDR+0x27C;
-const Qk_ADDR: usize = Forma_ADDR+0x28C;
+const Forma_ADDR: usize = BASE + 0x390;
+const Lk_ADDR: usize = Forma_ADDR + 0x264;
+const Ck_ADDR: usize = Forma_ADDR + 0x268;
+const Csv_ADDR: usize = Forma_ADDR + 0x27C;
+const Qk_ADDR: usize = Forma_ADDR + 0x28C;
 
 pub struct Meme {
     handle: HANDLE,
@@ -137,6 +137,23 @@ impl Meme {
             f = true;
         }
 
+        if !(10.0..=15.0).contains(&self.qk()) {
+            println!("Подозрительная Qk");
+            f = true;
+        }
+        if !(10.0e-6..=24.0e-6).contains(&self.lk()) {
+            println!("Подозрительная Qk");
+            f = true;
+        }
+        if !(100.0e-12..=200.0e-12).contains(&self.csv()) {
+            println!("Подозрительная Qk");
+            f = true;
+        }
+        if !(250.0e-11..=500.0e-11).contains(&self.ck()) {
+            println!("Подозрительная Qk");
+            f = true;
+        }
+
         for (n, i) in self.sa().into_iter().enumerate() {
             if !(1..=5).contains(&i) {
                 println!("Подозрительные переключатель SA{}", n + 1);
@@ -161,11 +178,6 @@ impl Meme {
 
         self.read(VM_ADRR)
     }
-
-    // fn set_vm_max(&self){
-    //     let vm = 100.0f32;
-    //     write(self.handle, VM_MAX_ADRR, &vm)
-    // }
 
     pub fn vm_round(&self) -> f64 {
         let volt = self.vm();

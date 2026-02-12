@@ -102,7 +102,7 @@ pub fn find_volt_from_fv1_plus(app: &mut App, find_volt: f64, revers: bool) {
         }
 
         let f = app.mem.fv() / 1000.;
-        for (n, i) in [300., 1000., 3000.].into_iter().enumerate() {
+        for (n, i) in [1000., 3000.].into_iter().enumerate() {
             if f == i {
                 let indx = if revers { n } else { n + 1 } as i32;
                 app.set_fv1(indx);
