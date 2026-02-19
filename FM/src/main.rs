@@ -11,20 +11,19 @@ mod step_helper;
 fn step1(app: &mut App) {
     let st = Instant::now();
     app.set_kia_to(KIA::DIGIT_AC);
-    app.set_sas([1,1,1]);
+    app.set_sas([1, 1, 1]);
     app.set_f_to(1000);
     app.set_fd_to(0.);
     app.set_fv1_to(4_000_000.);
-
 
     for sa2 in 0..4 {
         app.set_vg_to(1.);
         find_max_volt_from_fv1(app);
         let mut vg = 0.002;
 
-        for col in 0..9{
+        for col in 0..9 {
             app.set_vg_to(vg);
-            vg*=2.;
+            vg *= 2.;
             app.write_table1(col, sa2);
         }
 
@@ -45,20 +44,17 @@ fn step2(app: &mut App) {
     app.set_kia_to(KIA::DIGIT_DC);
     // app.set_sas([2,0,0]);
     let t = match app.mem.sa()[0] {
-        2=>2,
-        4=>4,
-        _=>panic!("errr")
+        2 => 2,
+        4 => 4,
+        _ => panic!("errr"),
     };
     app.set_f_to(1000);
     app.set_fd_to(0.);
     app.set_vg_to(0.01);
 
-
-    app.set_kia_to(KIA::AFC);
     app.open_table(t);
-    app.write_tabl2_4_call(5, 2, band/1000.);
+    app.write_tabl2_4_call(5, 2, band / 1000.);
     app.close_tabl();
-    app.set_kia_to(KIA::DIGIT_DC);
 
     app.write_table2_4(t, 5);
 
@@ -72,7 +68,7 @@ fn step2(app: &mut App) {
             v = app.mem.vm();
         }
 
-        app.write_table2_4(t, d+5);
+        app.write_table2_4(t, d + 5);
     }
     for d in 1..=5 {
         let f = fv - band * (d as f32 * 0.1);
@@ -82,13 +78,13 @@ fn step2(app: &mut App) {
             v -= app.mem.vm();
         }
 
-        app.write_table2_4(t, 5-d)
+        app.write_table2_4(t, 5 - d)
     }
 
     app.set_kia_to(KIA::AFC);
     app.open_table(t);
 
-    let s = v/ band*5e6;
+    let s = v.abs() / band * 5e6;
     app.write_tabl2_4_call(5, 3, s);
 
     // press_enter_for_exit();
@@ -103,25 +99,25 @@ fn step3(app: &mut App) {
     app.set_kia_to(KIA::DIGIT_AC);
     // app.set_sas([t as i16,0,0]);
     let t = match app.mem.sa()[0] {
-        2=>2,
-        4=>4,
-        _=>panic!("errr")
+        2 => 2,
+        4 => 4,
+        _ => panic!("errr"),
     };
     app.set_f_to(1000);
     app.set_fd_to(0.);
     app.set_vg_to(0.01);
 
-    let arr = [10,50,100,150,200,250,300,350,400,450,500,];
+    let arr = [10, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
 
     for (n, &i) in arr.iter().enumerate() {
         app.set_kia_to(KIA::DIGIT_AC);
-        app.set_fd_to((i*1000) as f32);
+        app.set_fd_to((i * 1000) as f32);
         app.set_kia_to(KIA::INI);
 
-        app.write_table3_5(t+1 , n as i32);
+        app.write_table3_5(t + 1, n as i32);
     }
 
-    app.open_table(t+1);
+    app.open_table(t + 1);
     app.final_table();
     app.close_tabl();
 
@@ -187,7 +183,7 @@ fn main() {
     step1(&mut app);
 
     app.sa2();
-    for sa1 in [2, 4]{
+    for sa1 in [2, 4] {
         app.set_kia_to(KIA::AFC);
         app.set_sas([sa1, 0, 0]);
         press_enter_for_exit();
@@ -200,7 +196,6 @@ fn main() {
         app.sa2();
         app.sa2();
     }
-
 
     println!("\nTotal time: {:.3}m", st.elapsed().as_secs_f32() / 60.);
     #[cfg(not(debug_assertions))]

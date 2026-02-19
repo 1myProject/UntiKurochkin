@@ -13,14 +13,16 @@ use windows_sys::Win32::System::Threading::{
     OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE,
 };
 
-const SA_ADRR: usize = 0x005cb220;
-const VM_ADRR: usize = 0x005cb180;
-const FV_ADRR: usize = 0x005CB0E8;
-const VG_ADRR: usize = 0x005CB114;
-const F_ADRR: usize = 0x005CB0F8;
-const DIV_ADRR: usize = 0x005CB0E4;
-const KG_ADRR:usize = 0x005CB07C;
-const BAND_ADRR:usize = 0x005CB0C8;
+const BASE: usize =0x005cb000;
+// const BASE: usize =0xA2E278;
+const SA_ADRR: usize = BASE+0x220;
+const VM_ADRR: usize = BASE+0x180;
+const FV_ADRR: usize = BASE+0x0E8;
+const VG_ADRR: usize = BASE+0x114;
+const F_ADRR: usize = BASE+0x0F8;
+const DIV_ADRR: usize = BASE+0x0E4;
+const KG_ADRR:usize = BASE+0x07C;
+const BAND_ADRR:usize = BASE+0x0C8;
 
 pub struct Meme {
     handle: HANDLE,
@@ -30,6 +32,7 @@ pub const SA_COUNT: usize = 3;
 impl Meme {
     pub fn new() -> Self {
         const PROC_NAME: &str = "LabFM2.exe";
+        // const PROC_NAME: &str = "VB6";
 
         println!("Ищу процесс: {}", PROC_NAME);
 
@@ -49,20 +52,20 @@ impl Meme {
         #[cfg(debug_assertions)]
         println!("PID = {}", pid);
 
-        let _base = match get_module_base(pid, PROC_NAME) {
-            Some(addr) => addr,
-            None => {
-                eprintln!(
-                    "Модуль '{}' не найден в процессе {} (мэйби надо запустить с админкой)",
-                    PROC_NAME, pid
-                );
-                press_enter_for_exit();
-                exit(2);
-            }
-        };
-
-        #[cfg(debug_assertions)]
-        println!("Базовый адрес модуля = 0x{_base:X}");
+        // let _base = match get_module_base(pid, PROC_NAME) {
+        //     Some(addr) => addr,
+        //     None => {
+        //         eprintln!(
+        //             "Модуль '{}' не найден в процессе {} (мэйби надо запустить с админкой)",
+        //             PROC_NAME, pid
+        //         );
+        //         press_enter_for_exit();
+        //         exit(2);
+        //     }
+        // };
+        //
+        // #[cfg(debug_assertions)]
+        // println!("Базовый адрес модуля = 0x{_base:X}");
 
         let h = unsafe {
             let h_process = OpenProcess(
@@ -266,8 +269,9 @@ fn read<T: ?Sized>(h_process: HANDLE, addr: usize, buf: &mut T) {
 
         if ok == 0 || bytes_read != bytes_read {
             eprintln!(
-                "Ошибка ReadProcessMemory: {}",
-                windows_sys::Win32::Foundation::GetLastError()
+                "Ошибка ReadProcessMemory: {}, по адр: {:X}",
+                windows_sys::Win32::Foundation::GetLastError(),
+                addr
             );
             press_enter_for_exit();
             exit(4);

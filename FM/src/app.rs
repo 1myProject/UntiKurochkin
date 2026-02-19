@@ -590,31 +590,19 @@ impl App {
     }
 
     pub fn write_table2_4(&mut self, t: i32, col: i32) {
-        let kia = self.cur_kia;
-
         let f = self.mem.fv() / 1000.;
-        self.set_kia_to(KIA::AFC);
+        let vm = self.mem.vm() * 1000.;
         self.open_table(t);
 
         self.write_tabl2_4_call(col, 0, f);
-        self.close_tabl();
-        self.set_kia_to(kia);
-
-        let vm = self.mem.vm() * 1000.;
-        self.set_kia_to(KIA::AFC);
-        self.open_table(t);
-
         self.write_tabl2_4_call(col, 1, vm);
+
         self.close_tabl();
-        self.set_kia_to(kia);
     }
 
     pub fn write_table3_5(&mut self, t: i32, col: i32) {
         let kg = self.mem.kg() * 100.;
         let vm = self.mem.vm() * 1000.;
-
-        let kia = self.cur_kia;
-        self.set_kia_to(KIA::AFC);
 
         self.open_table(t);
 
@@ -622,8 +610,6 @@ impl App {
         self.write_tabl3_5_call(col, 1, kg);
 
         self.close_tabl();
-
-        self.set_kia_to(kia);
     }
 
     fn write_tabl1_call(&mut self, col: i32, row: i32, val: f32) {
@@ -638,7 +624,7 @@ impl App {
     pub fn write_tabl2_4_call(&mut self, col: i32, row: i32, val: f32) {
         let text = format!("{val:.1}");
 
-        self.sleep(2000);
+        // self.sleep(2000);
 
         self.click_table(138 + col * 80, 123 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
