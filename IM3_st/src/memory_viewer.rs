@@ -16,7 +16,7 @@ use windows_sys::Win32::System::Threading::{
     OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE,
 };
 
-const BASE: usize = 0x006D8000;
+const BASE: usize = 0x006DF000;
 const SA_ADRR: usize = BASE + 0x168;
 const VM_ADRR: usize = BASE + 0x1F0;
 // const VM_MAX_ADRR: usize = BASE + 0x084;
@@ -42,7 +42,7 @@ pub struct Meme {
 pub const SA_COUNT: usize = 7;
 impl Meme {
     pub fn new() -> Self {
-        const PROC_NAME: &str = "LabIM3.exe";
+        const PROC_NAME: &str = "LabIM3_st.exe";
 
         println!("Ищу процесс: {}", PROC_NAME);
 
@@ -177,12 +177,6 @@ impl Meme {
         thread::sleep(time::Duration::from_millis(1));
 
         self.read(VM_ADRR)
-    }
-
-    pub fn vm_round(&self) -> f64 {
-        let volt = self.vm();
-        const ZERS: f64 = 10_000.;
-        (volt * ZERS).round() / ZERS
     }
 
     #[inline]

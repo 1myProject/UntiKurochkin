@@ -15,16 +15,16 @@ use windows_sys::Win32::System::Threading::{
     OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_OPERATION, PROCESS_VM_READ, PROCESS_VM_WRITE,
 };
 
-const SA_ADRR: usize = 0x006321DC;
-const VM_ADRR: usize = 0x00632080;
-const VM_MAX_ADRR: usize = 0x00632084;
-const FV_ADRR: usize = 0x0063210C;
-const VG_ADRR: usize = 0x00632090;
-const M_ADRR: usize = 0x00632114;
-const FM_ADRR: usize = 0x00632110;
-const KG_ADRR: usize = 0x006322F4;
-const R8_ADRR: usize = 0x006321C8;
-const I6_ADRR: usize = 0x0063222C;
+const BASE: usize = 0x639000;
+const SA_ADRR: usize = BASE + 0x1DC;
+const VM_ADRR: usize = BASE + 0x080;
+const FV_ADRR: usize = BASE + 0x10C;
+const VG_ADRR: usize = BASE + 0x090;
+const M_ADRR: usize = BASE + 0x114;
+const FM_ADRR: usize = BASE + 0x110;
+const KG_ADRR: usize = BASE + 0x2F4;
+const R8_ADRR: usize = BASE + 0x1C8;
+const I6_ADRR: usize = BASE + 0x22C;
 
 pub struct Meme {
     handle: HANDLE,
@@ -95,8 +95,6 @@ impl Meme {
             exit(5);
         }
 
-        mem.set_vm_max();
-
         mem
     }
 
@@ -147,10 +145,6 @@ impl Meme {
         self.read(VM_ADRR)
     }
 
-    fn set_vm_max(&self){
-        let vm = 100.0f32;
-        write(self.handle, VM_MAX_ADRR, &vm)
-    }
 
     pub fn vm_round(&self) -> f32{
         let volt = self.vm();

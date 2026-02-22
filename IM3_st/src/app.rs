@@ -3,7 +3,6 @@ use crate::open_windows::{get_pos_etap6, get_pos_maket, get_pos_open_table};
 use enigo::Button::Left;
 use enigo::Coordinate::Abs;
 use enigo::{Direction, Enigo, Key, Keyboard, Mouse, Settings};
-use std::cmp::Ordering;
 
 #[derive(PartialEq)]
 pub enum KIA {
@@ -524,8 +523,4 @@ impl App {
             while get_pos_was_saved().pos() != (0, 0) {}
         }
     }
-}
-
-fn float_order(x: &&f32, y: &&f32) -> Ordering {
-    x.partial_cmp(y).unwrap()
 }
