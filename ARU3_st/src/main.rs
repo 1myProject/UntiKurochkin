@@ -73,7 +73,7 @@ fn step2(app: &mut App) {
     app.find_volt_by_vg1(0.5);
     find_max_volt_from_fv1(app);
 
-    doing(app, 1);
+    // doing(app, 1);
 
     let vg = app.mem.vg() * 50.;
     app.set_vg_to(vg);
@@ -367,7 +367,7 @@ fn step4_7(app: &mut App) {
         app.write_table4_7(n, 2, kg);
     }
 
-    let k_reg = 20.*(20./min_u/max_u).log10();
+    let k_reg = 20.*(20.*min_u/max_u).log10();
 
     #[cfg(debug_assertions)]
     println!("k_reg: {}", k_reg);

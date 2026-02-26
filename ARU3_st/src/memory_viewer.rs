@@ -183,9 +183,9 @@ impl Meme {
     }
 
     pub fn uk(&self) -> f32 {
-        const Ek: usize = 0x0063289C;
-        const Ib_VT1: usize = 0x0063223C;
-        const Ube_VT1: usize = 0x006322D0;
+        const Ek: usize = BASE + 0xDF8;
+        const Ib_VT1: usize = BASE + 0x23C;
+        const Ube_VT1: usize = BASE + 0x2D0;
 
         let ek:f32 = self.read::<i32>(Ek) as f32;
         let ib:f32 = self.read(Ib_VT1);

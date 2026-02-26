@@ -611,9 +611,10 @@ impl App {
         let down: fn(&mut Self);
         let up: fn(&mut Self);
 
-        if reverse {
+        if !reverse {
             down = |app: &mut Self| app.scroll_r8_up();
             up = |app: &mut Self| app.scroll_r8_down();
+
         } else {
             down = |app: &mut Self| app.scroll_r8_down();
             up = |app: &mut Self| app.scroll_r8_up();
