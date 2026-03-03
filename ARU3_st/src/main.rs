@@ -422,9 +422,9 @@ fn main() {
 
         #[cfg(not(debug_assertions))]
         {
-            use std::process::exit;
             use rdev::{listen, EventType, Key};
-            use crossterm::event::{self, Event, KeyCode};
+            use std::process::exit;
+            use std::{thread};
             thread::spawn(move || {
                 listen(move |event| {
                     if event.event_type == EventType::KeyPress(Key::Escape) {
