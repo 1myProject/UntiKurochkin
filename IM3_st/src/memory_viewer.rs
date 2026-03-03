@@ -137,20 +137,20 @@ impl Meme {
             f = true;
         }
 
-        if !(10.0..=15.0).contains(&self.qk()) {
+        if !(5.0..=10.0).contains(&self.qk()) {
             println!("Подозрительная Qk");
             f = true;
         }
         if !(10.0e-6..=24.0e-6).contains(&self.lk()) {
-            println!("Подозрительная Qk");
+            println!("Подозрительная Lk");
             f = true;
         }
         if !(100.0e-12..=200.0e-12).contains(&self.csv()) {
-            println!("Подозрительная Qk");
+            println!("Подозрительная Csv");
             f = true;
         }
         if !(250.0e-11..=500.0e-11).contains(&self.ck()) {
-            println!("Подозрительная Qk");
+            println!("Подозрительная Ck");
             f = true;
         }
 
