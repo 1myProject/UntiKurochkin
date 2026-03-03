@@ -328,19 +328,15 @@ fn main() {
 
         #[cfg(not(debug_assertions))]
         {
-            use crossterm::event::{self, Event, KeyCode};
+            use rdev::{listen, EventType, Key};
             use std::process::exit;
-            use std::{thread, time::Duration};
+            use std::{thread};
             thread::spawn(move || {
-                loop {
-                    if event::poll(Duration::from_millis(100)).unwrap() {
-                        if let Event::Key(key_event) = event::read().unwrap() {
-                            if key_event.code == KeyCode::Esc {
-                                exit(0);
-                            }
-                        }
+                listen(move |event| {
+                    if event.event_type == EventType::KeyPress(Key::Escape){
+                        exit(0);
                     }
-                }
+                })
             });
         }
 
