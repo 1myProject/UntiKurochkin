@@ -73,7 +73,7 @@ fn step2(app: &mut App) {
     app.find_volt_by_vg1(0.5);
     find_max_volt_from_fv1(app);
 
-    // doing(app, 1);
+    doing(app, 1);
 
     let vg = app.mem.vg() * 50.;
     app.set_vg_to(vg);
@@ -195,7 +195,7 @@ fn step4_2(app: &mut App) {
     find_max_volt_from_fv1(app);
 
     let f0 = app.mem.fv();
-    app.write_table4_2(4, 4, f0/1000.);
+    app.write_table4_2(4, 4, f0/1000., false);
 
     for (n, u) in [0.01, 0.1, 1., 2., 5., 10., 20., 50., 100.].into_iter().enumerate() {
         let n = n as i32;
@@ -206,19 +206,19 @@ fn step4_2(app: &mut App) {
         // find_max_volt_from_fv1(app);
 
         let vm = app.mem.vm()*1000.;
-        app.write_table4_2(n, 0, vm);
+        app.write_table4_2(n, 0, vm, false);
 
         let i = app.mem.i8()*1000.;
-        app.write_table4_2(n, 3, i);
+        app.write_table4_2(n, 3, i, true);
 
         app.sa8();
         app.sleep(100);
         let vm = app.mem.vm()*1000.;
-        app.write_table4_2(n, 1, vm);
+        app.write_table4_2(n, 1, vm, false);
 
         app.set_kia_to(KIA::INI);
         let kg = app.mem.kg();
-        app.write_table4_2(n, 2, kg);
+        app.write_table4_2(n, 2, kg, true);
     }
 
     app.set_kia_to(KIA::DIGIT);
@@ -226,11 +226,11 @@ fn step4_2(app: &mut App) {
     app.find_volt_by_vg1(0.12);
 
     let vg = app.mem.vg()*1000.;
-    app.write_table4_2(3, 5, vg);
+    app.write_table4_2(3, 5, vg, false);
 
     app.set_kia_to(KIA::INI);
     let kg = app.mem.kg();
-    app.write_table4_2(3, 6, kg);
+    app.write_table4_2(3, 6, kg, false);
     app.set_kia_to(KIA::DIGIT);
 
     app.open_table(4);
@@ -242,7 +242,7 @@ fn step4_2(app: &mut App) {
 fn step4_3_to_5(app: &mut App) {
     let doing = |app: &mut App, table:u32| {
         let f = app.mem.fv()/1000.;
-        app.write_table4_3_5(table, 4, 2, f);
+        app.write_table4_3_5(table, 4, 2, f, false);
 
         for (n, u) in [0.01, 0.1, 1., 2., 5., 10., 20., 50., 100.].into_iter().enumerate() {
             let n = n as i32;
@@ -250,10 +250,10 @@ fn step4_3_to_5(app: &mut App) {
             app.set_vg_to(u);
 
             let vm = app.mem.vm()*1000.;
-            app.write_table4_3_5(table, n, 0, vm);
+            app.write_table4_3_5(table, n, 0, vm, false);
 
             let i = app.mem.i8()*1000.;
-            app.write_table4_3_5(table, n, 1, i);
+            app.write_table4_3_5(table, n, 1, i, true);
         }
         let indx = ((table + 2) % 7) as i32;
 

@@ -789,25 +789,21 @@ impl App {
 
         self.close_tabl();
     }
-    pub fn write_table4_2(&mut self, col: i32, row: i32, val: f32) {
+    pub fn write_table4_2(&mut self, col: i32, row: i32, val: f32, is_two_digs: bool) {
         self.open_table(4);
 
-        self.write_tabl4_2_call(col, row, val);
+        let digs = if is_two_digs { 2 } else {1};
+        self.write_tabl4_2_call(col, row, val, digs);
 
         self.close_tabl();
     }
 
-    pub fn write_table4_3_5(&mut self, table: u32,  col: i32, row: i32, val: f32) {
+    pub fn write_table4_3_5(&mut self, table: u32,  col: i32, row: i32, val: f32, is_two_digs: bool) {
         let indx = ((table + 2) % 7) as i32;
-        // let indx = match table {
-        //     3=>5,
-        //     4=>6,
-        //     5=>0,
-        //     _=>7,
-        // };
         self.open_table(indx);
 
-        self.write_tabl4_3_5_call(col, row, val);
+        let digs = if is_two_digs { 2 } else {1};
+        self.write_tabl4_3_5_call(col, row, val, digs);
 
         self.close_tabl();
     }
@@ -871,8 +867,8 @@ impl App {
         self.sleep(WRITE_TABL_CLICK_T);
     }
 
-    fn write_tabl4_2_call(&mut self, col: i32, row: i32, val: f32) {
-        let text = format!("{val:.1}");
+    fn write_tabl4_2_call(&mut self, col: i32, row: i32, val: f32, count_digs_by_point: usize) {
+        let text = format!("{val:.digs$}",digs = count_digs_by_point);
 
         self.click_table(189 + col * 82, 121 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
@@ -880,8 +876,8 @@ impl App {
         self.sleep(WRITE_TABL_CLICK_T);
     }
 
-    fn write_tabl4_3_5_call(&mut self, col: i32, row: i32, val: f32) {
-        let text = format!("{val:.1}");
+    fn write_tabl4_3_5_call(&mut self, col: i32, row: i32, val: f32, count_digs_by_point: usize) {
+        let text = format!("{val:.digs$}",digs = count_digs_by_point);
 
         self.click_table(130 + col * 82, 121 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
