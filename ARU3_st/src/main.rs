@@ -294,7 +294,7 @@ fn step4_6(app: &mut App, i_start: f32) {
     app.r8_to(i_start);
     find_max_volt_from_fv1(app);
 
-    app.set_vg_to(0.000_1);
+    app.set_vg_to(0.000_01);
     app.set_sas([1, 0,0,0,0,0,0,0]);
     app.sleep(100);
     let vm1 = app.mem.vm()*1000.;

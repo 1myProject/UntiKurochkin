@@ -769,7 +769,12 @@ impl App {
     pub fn write_table2(&mut self, col: i32, row: i32, val: f32) {
         self.open_table(1);
 
-        self.write_tabl2_call(col, row, val);
+        let digs = if val < 1. {
+            3
+        } else {
+            1
+        };
+        self.write_tabl2_call(col, row, val, digs);
 
         self.close_tabl();
     }
@@ -840,8 +845,8 @@ impl App {
         self.sleep(WRITE_TABL_CLICK_T);
     }
 
-    fn write_tabl2_call(&mut self, col: i32, row: i32, val: f32) {
-        let text = format!("{val:.1}");
+    fn write_tabl2_call(&mut self, col: i32, row: i32, val: f32, count_digs_by_point: usize) {
+        let text = format!("{val:.digs$}",digs = count_digs_by_point);
 
         self.click_table(211 + col * 81, 120 + row * 32);
         self.sleep(WRITE_TABL_CLICK_T);
