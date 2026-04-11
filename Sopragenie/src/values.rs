@@ -1,6 +1,5 @@
 use crate::app::App;
 use crate::memory_viewer::Meme;
-
 pub trait Move {
     const MORE: i32;
     const MORE_MORE: i32;
@@ -11,8 +10,14 @@ pub trait Move {
 
     const MAX_VALUE: f32;
     const MIN_VALUE: f32;
-    fn val(&self, app: &mut App) -> f32 {
+
+    #[inline]
+    fn val(&self, app: &App) -> f32 {
         Self::F(&app.mem)
+    }
+    #[inline]
+    fn val2(mem: &Meme) -> f32 {
+        Self::F(mem)
     }
 
     #[inline]
@@ -20,7 +25,7 @@ pub trait Move {
         app.click(Self::MORE, Self::Y);
     }
     fn more_more(&self, app: &mut App) {
-        if Self::F(&app.mem) >= Self::MAX_VALUE {
+        if self.val(app) >= Self::MAX_VALUE {
             return self.more(app);
         }
         app.click(Self::MORE_MORE, Self::Y);
@@ -30,7 +35,7 @@ pub trait Move {
         app.click(Self::LESS, Self::Y);
     }
     fn less_less(&self, app: &mut App) {
-        if Self::F(&app.mem) <= Self::MIN_VALUE {
+        if self.val(app) <= Self::MIN_VALUE {
             return self.less(app);
         }
         app.click(Self::LESS_LESS, Self::Y);

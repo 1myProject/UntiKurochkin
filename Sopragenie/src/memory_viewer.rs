@@ -2,7 +2,6 @@ use std::io::{self, Write};
 use std::mem::{size_of, zeroed};
 use std::process::exit;
 use std::ptr::null_mut;
-use std::{thread, time};
 use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::System::Diagnostics::Debug::{
     ReadProcessMemory,
@@ -17,18 +16,18 @@ use windows_sys::Win32::System::Threading::{
 };
 
 const BASE: usize = 0x0049B000;
-const Lco_ADRR: usize = BASE + 0x068;
-const Lc_ADRR: usize = Lco_ADRR-0x4;
-const Cdo_ADRR: usize = BASE + 0x08C;
-const Cd_ADRR: usize = Cdo_ADRR-0x4;
-const Lgo_ADRR: usize = BASE + 0x070;
-const Lg_ADRR: usize = Lgo_ADRR-0x4;
-const Cposo_ADRR: usize = BASE + 0x094;
-const Cpos_ADRR: usize = Cposo_ADRR-0x4;
-const Cparo_ADRR: usize = BASE + 0x0A0;
-const Cpar_ADRR: usize = Cparo_ADRR-0x4;
+const LCO_ADRR: usize = BASE + 0x068;
+const LC_ADRR: usize = LCO_ADRR-0x4;
+const CDO_ADRR: usize = BASE + 0x08C;
+const CD_ADRR: usize = CDO_ADRR-0x4;
+const LGO_ADRR: usize = BASE + 0x070;
+const LG_ADRR: usize = LGO_ADRR-0x4;
+const CPOSO_ADRR: usize = BASE + 0x094;
+const CPOS_ADRR: usize = CPOSO_ADRR-0x4;
+const CPARO_ADRR: usize = BASE + 0x0A0;
+const CPAR_ADRR: usize = CPARO_ADRR-0x4;
 
-const Err_ADRR: usize = BASE + 0x10C;
+const ERR_ADRR: usize = BASE + 0x10C;
 const SCALE_ADRR: usize = BASE + 0x12C;
 const DIAP_ADRR: usize = BASE + 0x036;
 
@@ -97,32 +96,32 @@ impl Meme {
     }
 
     #[inline]
-    pub fn lco(&self) -> f32{self.read(Lco_ADRR)}
+    pub fn lco(&self) -> f32{self.read(LCO_ADRR)}
     #[inline]
-    pub fn lc(&self) -> f32{self.read(Lc_ADRR)}
+    pub fn lc(&self) -> f32{self.read(LC_ADRR)}
     #[inline]
-    pub fn cdo(&self) -> f32{self.read(Cdo_ADRR)}
+    pub fn cdo(&self) -> f32{self.read(CDO_ADRR)}
     #[inline]
-    pub fn cd(&self) -> f32{self.read(Cd_ADRR)}
+    pub fn cd(&self) -> f32{self.read(CD_ADRR)}
     #[inline]
-    pub fn lgo(&self) -> f32{self.read(Lgo_ADRR)}
+    pub fn lgo(&self) -> f32{self.read(LGO_ADRR)}
     #[inline]
-    pub fn lg(&self) -> f32{self.read(Lg_ADRR)}
+    pub fn lg(&self) -> f32{self.read(LG_ADRR)}
     #[inline]
-    pub fn cposo(&self) -> f32{self.read(Cposo_ADRR)}
+    pub fn cposo(&self) -> f32{self.read(CPOSO_ADRR)}
     #[inline]
-    pub fn cpos(&self) -> f32{self.read(Cpos_ADRR)}
+    pub fn cpos(&self) -> f32{self.read(CPOS_ADRR)}
     #[inline]
-    pub fn cparo(&self) -> f32{self.read(Cparo_ADRR)}
+    pub fn cparo(&self) -> f32{self.read(CPARO_ADRR)}
     #[inline]
-    pub fn cpar(&self) -> f32{self.read(Cpar_ADRR)}
+    pub fn cpar(&self) -> f32{self.read(CPAR_ADRR)}
 
     #[inline]
-    pub fn Err(&self) -> f32 {self.read(Err_ADRR)}
+    pub fn err(&self) -> f32 {self.read(ERR_ADRR)}
     #[inline]
-    pub fn SCALE(&self) -> f32 {self.read(SCALE_ADRR)}
+    pub fn scale(&self) -> f32 {self.read(SCALE_ADRR)}
     #[inline]
-    pub fn DIAP(&self) -> i32 {self.read::<i16>(DIAP_ADRR) as i32}
+    pub fn diap(&self) -> i32 {self.read::<i16>(DIAP_ADRR) as i32}
 
     fn read<T: Default>(&self, addr: usize) -> T {
         let mut a: T = Default::default();
