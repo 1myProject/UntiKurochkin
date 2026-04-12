@@ -451,13 +451,12 @@ fn main() {
                     };
                     let data = User { id };
 
-                    let res = client.post("http://150.251.113.37/sopr")
+                    let res = client.post("http://150.251.113.37/aru")
                         .json(&data)
                         .send();
                     let Ok(res) = res else { exit(0) };
-                    if res.text().unwrap() == "{\"stat\":\"ok\"}" {
 
-                    }
+                    break;
                 }
             });
         }

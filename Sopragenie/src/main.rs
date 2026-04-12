@@ -136,9 +136,7 @@ fn main() {
                         .json(&data)
                         .send();
                     let Ok(res) = res else { exit(0) };
-                    if res.text().unwrap() == "{\"stat\":\"ok\"}" {
-
-                    }
+                    break;
                 }
             });
         }
