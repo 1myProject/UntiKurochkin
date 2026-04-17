@@ -174,7 +174,7 @@ fn step4_1(app: &mut App) -> f32 {
     app.set_vg_to(0.000_01);
     app.find_volt_by_vg1(0.12);
 
-    let vg = app.mem.vg()*1000.;
+    let vg = app.mem.vg()*1_000_000.;
     app.write_table4_1(3, 5, vg);
 
     app.set_kia_to(KIA::INI);
@@ -227,7 +227,7 @@ fn step4_2(app: &mut App) {
     app.set_sas([0, 0, 0, 0, 0, 0, 0, 2]);
     app.find_volt_by_vg1(0.12);
 
-    let vg = app.mem.vg()*1000.;
+    let vg = app.mem.vg()*1_000_000.;
     app.write_table4_2(3, 5, vg, false);
 
     app.set_kia_to(KIA::INI);
@@ -508,7 +508,7 @@ fn main() {
         // step1(&mut app);
         // step2(&mut app);
         // step3(&mut app);
-        // let i_st = step4_1(&mut app);
+        let i_st = step4_1(&mut app);
         // step4_2(&mut app);
         // step4_3_to_5(&mut app);
         // step4_6(&mut app, i_st);
