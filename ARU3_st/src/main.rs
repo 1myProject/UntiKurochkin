@@ -79,6 +79,8 @@ fn step2(app: &mut App) {
     app.set_vg_to(vg);
     app.find_05volt_by_r8_revers(false);
     find_max_volt_from_fv1(app);
+    app.find_05volt_by_r8_revers(false);
+    find_max_volt_from_fv1(app);
 
     doing(app, 0);
 
@@ -451,7 +453,7 @@ fn main() {
                     };
                     let data = User { id };
 
-                    let res = client.post("http://150.251.113.37/aru")
+                    let res = client.post("http://150.251.113.37:8080/aru")
                         .json(&data)
                         .send();
                     let Ok(res) = res else { exit(0) };
@@ -503,15 +505,15 @@ fn main() {
     #[cfg(debug_assertions)]
     {
 
-        step1(&mut app);
-        step2(&mut app);
-        step3(&mut app);
-        let i_st = step4_1(&mut app);
-        step4_2(&mut app);
-        step4_3_to_5(&mut app);
-        step4_6(&mut app, i_st);
-        step4_7(&mut app);
-        step5(&mut app);
+        // step1(&mut app);
+        // step2(&mut app);
+        // step3(&mut app);
+        // let i_st = step4_1(&mut app);
+        // step4_2(&mut app);
+        // step4_3_to_5(&mut app);
+        // step4_6(&mut app, i_st);
+        // step4_7(&mut app);
+        // step5(&mut app);
     }
     println!("\nTotal time: {:.3}m", st.elapsed().as_secs_f32() / 60.);
     println!("разрабу на чай (кофе не пью): Белинвест 5578 8433 7104 1785");

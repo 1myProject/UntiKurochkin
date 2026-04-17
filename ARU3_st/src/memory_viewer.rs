@@ -192,13 +192,13 @@ impl Meme {
         let ube:f32 = self.read(Ube_VT1);
 
         let ie = self.i8();
-        
+
         let uk = if ek - (ie+ib)*2400. > ie * 510. + ube{
             ek - (ie+ib)*2400.
         } else {
             ie * 510.
         };
-        
+
         -uk
     }
 
@@ -231,7 +231,8 @@ fn find_process_id(proc_name: &str) -> Option<u32> {
             loop {
                 let arr = std::mem::transmute::<&[i8; 260], &[u8; 260]>(&entry.szExeFile);
                 let name = String::from_utf8_lossy(arr).to_string();
-                // println!("{name}");
+                #[cfg(debug_assertions)]
+                println!("{name}");
                 if name.starts_with(proc_name) {
                     if !ret.is_none() {
                         CloseHandle(snap as HANDLE);
