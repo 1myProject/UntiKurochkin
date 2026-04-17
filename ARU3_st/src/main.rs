@@ -349,6 +349,7 @@ fn step4_7(app: &mut App) {
         app.set_vg_to(u);
         app.set_kia_to(KIA::DIGIT);
         app.set_sas([0, 0, 0, 0, 0, 0, 0, 1]);
+        app.sleep(100);
 
         let vm = app.mem.vm()*1000.;
         if n == 4{
@@ -508,11 +509,11 @@ fn main() {
         // step1(&mut app);
         // step2(&mut app);
         // step3(&mut app);
-        let i_st = step4_1(&mut app);
+        // let i_st = step4_1(&mut app);
         // step4_2(&mut app);
         // step4_3_to_5(&mut app);
         // step4_6(&mut app, i_st);
-        // step4_7(&mut app);
+        step4_7(&mut app);
         // step5(&mut app);
     }
     println!("\nTotal time: {:.3}m", st.elapsed().as_secs_f32() / 60.);
