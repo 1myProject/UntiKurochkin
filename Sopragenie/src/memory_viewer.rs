@@ -97,8 +97,12 @@ impl Meme {
     #[inline]
     pub fn lco(&self) -> f32 {
         let lco: f32 = self.read(LCO_ADRR);
-        const ZERS: f32 = 1E9;
-        (lco * ZERS).round() / ZERS
+        let zers: f32 = match self.diap() {
+            1=>1E6,
+            2..=4=>1E7,
+            _=>1E9,
+        };
+        (lco * zers).round() / zers
     }
     #[inline]
     pub fn lc(&self) -> f32 {
