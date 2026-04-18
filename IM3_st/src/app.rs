@@ -93,6 +93,18 @@ impl App {
         }
         self.cur_kia = kia;
     }
+    pub fn osc_us(&mut self, us: f64) {
+        match us {
+            0.5 => self.click(640, 667),
+            1.5 => self.click(604, 667),
+            5.0 => self.click(568, 667),
+            15.0 => self.click(532, 667),
+            50.0 => self.click(496, 667),
+            150.0 => self.click(460, 667),
+            _=>panic!("нет такого us ({us}) для osc_us"),
+        }
+        self.sleep(1000);
+    }
     pub fn set_to_maket2(&mut self) {
         self.click(183, 37);
         self.sleep(100);

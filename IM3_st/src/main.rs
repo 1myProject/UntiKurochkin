@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::app::{App, KIA};
 use crate::memory_viewer::Meme;
 use crate::step_helper::{find_max_volt_from_fv1, find_volt_from_fv1_plus};
 #[cfg(not(debug_assertions))]
@@ -80,7 +80,10 @@ fn step2(app: &mut App, fv: f64, dfs_07: [f64; 4]) {
     for (n, &df) in dfs_07.iter().enumerate() {
         let t = 2.2 / PI * 1_000_000.0 / df;
         let t = t - t % 1.5;
+        app.set_kia_to(KIA::OSC);
+        app.osc_us(1.5);
         app.write_table2(n as i32, t);
+        app.set_kia_to(KIA::DIGIT);
 
         app.sa_num(1);
         app.sleep(800);
@@ -151,14 +154,21 @@ fn step4(app: &mut App) {
     let tdspad = app.mem.tdspad() * 1_000_000.0 * 2.3;
     let tdspad = tdspad - tdspad % 5.;
 
+
+    app.set_kia_to(KIA::OSC);
+    app.osc_us(5.0);
     app.write_table4(0, tust, tdspad);
+    app.set_kia_to(KIA::DIGIT);
 
     app.sa_num(3);
     app.sleep(WAIT);
 
     let answ = (1.0 / app.mem.fi() as f64) * 1_000_000. / 2.0;
     let answ = answ - answ % 5.;
+    app.set_kia_to(KIA::OSC);
+    app.osc_us(5.0);
     app.write_table4(1, answ, answ);
+    app.set_kia_to(KIA::DIGIT);
 
     app.sa_num(3);
     app.sleep(WAIT);
@@ -167,7 +177,10 @@ fn step4(app: &mut App) {
     let tust = tust - tust % 15.;
     let tdspad = app.mem.tdspad() * 1_000_000.0 * 2.3;
     let tdspad = tdspad - tdspad % 15.;
+    app.set_kia_to(KIA::OSC);
+    app.osc_us(15.0);
     app.write_table4(2, tust, tdspad);
+    app.set_kia_to(KIA::DIGIT);
 
     app.open_table(3);
     app.final_table();
@@ -265,13 +278,13 @@ fn step6(app: &mut App) {
         let k: f64 = if n == 1 { 2.3 } else { PI };
         let mut t = tau(Teta, Foo, Qk, 1.) * 1000000. * k;
 
-        if n == 1 {
-            t = t - t % 1.5;
-        } else {
-            t = t - t % 5.0;
-        }
+        let koef = if n == 1 { 1.5 } else { 5.0 };
+        t = t - t % koef;
 
-        app.write_table6(n as i32, t)
+        app.set_kia_to(KIA::OSC);
+        app.osc_us(koef);
+        app.write_table6(n as i32, t);
+        app.set_kia_to(KIA::DIGIT);
     }
 
     app.open_table(1);
@@ -357,7 +370,7 @@ fn main() {
                     };
                     let data = User { id };
 
-                    let res = client.post("http://150.251.113.37/im")
+                    let res = client.post("http://150.251.113.37:8080/im")
                         .json(&data)
                         .send();
                     let Ok(res) = res else { exit(0) };
@@ -411,14 +424,14 @@ fn main() {
     }
     #[cfg(debug_assertions)]
     {
-        // let (fv, dfs) = step1(&mut app);
-        // step2(&mut app, fv, dfs);
-        // step3(&mut app);
-        // step4(&mut app);
+        let (fv, dfs) = step1(&mut app);
+        step2(&mut app, fv, dfs);
+        step3(&mut app);
+        step4(&mut app);
         app.set_to_maket2();
-        // step5(&mut app);
-        // step6(&mut app);
-        // step7(&mut app);
+        step5(&mut app);
+        step6(&mut app);
+        step7(&mut app);
     }
     println!("\nTotal time: {:.3}m", st.elapsed().as_secs_f32() / 60.);
     println!("разрабу на чай (кофе не пью): Белинвест 5578 8433 7104 1785");
