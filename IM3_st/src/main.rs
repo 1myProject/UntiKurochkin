@@ -262,10 +262,7 @@ fn step6(app: &mut App) {
 
     // app.set_kia_to(KIA::OSC);
 
-    let Qk = app.mem.qk();
-    let Csv = app.mem.csv();
-    let Lk = app.mem.lk();
-    let Ck = app.mem.ck();
+    let (Qk, Lk, Csv, Ck) = app.mem.get_from_form();
 
     const ARR: [f64; 3] = [6.0e-10, 1.2e-09, 0.0];
     for (n, Csvd) in ARR.iter().enumerate() {
@@ -305,10 +302,7 @@ fn step7(app: &mut App) {
 
     // app.set_kia_to(KIA::OSC);
 
-    let Qk = app.mem.qk();
-    let Csv = app.mem.csv();
-    let Lk = app.mem.lk();
-    let Ck = app.mem.ck();
+    let (Qk, Lk, Csv, Ck) = app.mem.get_from_form();
 
     let tdspad = app.mem.tdspad() * 2.2 * 1000000.;
     const ARR: [f64; 3] = [0.0000000006, 1.2e-09, 0.0];
