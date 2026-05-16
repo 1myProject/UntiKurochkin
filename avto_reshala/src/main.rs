@@ -89,8 +89,21 @@ fn get_list_of_files() -> Result<Vec<DirEntry>, Box<dyn std::error::Error>> {
     Ok(entries)
 }
 
+fn wait() {
+    use std::io::{self, BufRead};
+    // Блокирует выполнение до ввода
+    let stdin = io::stdin();
+    let _ = stdin.lock().lines().next();
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let curl = fs::read_to_string("curl.txt")?;
+
+    if !curl.starts_with("curl") {
+        println!("Эм. В файле написано не совсем то что надо:\n{curl}");
+        wait();
+        return Ok(());
+    }
 
     // --- Парсинг curl ---
 
@@ -218,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!("Можете обновлять страницу браузера.\nИ закинуть донатик в эту ёбаную кантору (шутка, не говорите Курочкину)");
-
+    wait();
     Ok(())
 }
 
