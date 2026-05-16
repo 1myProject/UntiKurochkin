@@ -226,7 +226,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if status == 200 && text == r#"[{"error":false,"data":[true]}]"# {
             println!("+");
         } else {
-            println!("-  (status={}, body={})", status, text);
+            println!("- error (status={}, body={})", status, text);
         }
     }
 
